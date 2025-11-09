@@ -102,7 +102,7 @@ export function Login({ onNavigateBack, onNavigateToSignup, isDark }: LoginProps
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className={`text-4xl mb-2 ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}
               >
-                Riden'Byte
+                Sign In
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0 }}
