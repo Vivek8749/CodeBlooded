@@ -3,6 +3,7 @@ import { UtensilsCrossed, Car, ArrowRight } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { useEffect } from "react";
 
 interface DashboardProps {
   isDark: boolean;
@@ -12,6 +13,11 @@ interface DashboardProps {
 }
 
 export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToRide }: DashboardProps) {
+  useEffect(() => {
+    console.log("📊 Dashboard component mounted!");
+    console.log("- isDark:", isDark);
+  }, [isDark]);
+
   return (
     <div className="min-h-screen w-full overflow-hidden relative flex flex-col">
       {/* Header */}
