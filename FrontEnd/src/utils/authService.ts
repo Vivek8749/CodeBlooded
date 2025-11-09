@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface User {
   _id: string;
@@ -24,7 +24,7 @@ export const authService = {
     phone?: string;
     studentId?: string;
   }): Promise<AuthResponse> => {
-    const response = await api.post('/users/signup', data);
+    const response = await api.post("/users/signup", data);
     return response.data.data;
   },
 
@@ -32,21 +32,23 @@ export const authService = {
     email: string;
     password: string;
   }): Promise<AuthResponse> => {
-    const response = await api.post('/users/login', data);
+    const response = await api.post("/users/login", data);
     return response.data.data;
   },
 
   logout: async (): Promise<void> => {
-    await api.post('/users/logout');
+    await api.post("/users/logout");
   },
 
   getCurrentUser: async (): Promise<User> => {
-    const response = await api.get('/users/me');
+    const response = await api.get("/users/me");
     return response.data.data.user;
   },
 
-  refreshToken: async (refreshToken: string): Promise<{ token: string; refreshToken: string }> => {
-    const response = await api.post('/users/refresh', { refreshToken });
+  refreshToken: async (
+    refreshToken: string
+  ): Promise<{ token: string; refreshToken: string }> => {
+    const response = await api.post("/users/refresh", { refreshToken });
     return response.data.data;
   },
 };

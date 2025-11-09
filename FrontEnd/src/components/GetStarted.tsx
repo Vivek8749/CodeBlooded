@@ -1,15 +1,22 @@
 import { motion } from "motion/react";
 import { Car, UtensilsCrossed, Users, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
 
 interface GetStartedProps {
   onNavigateToLogin: () => void;
   isDark: boolean;
+  toggleTheme: () => void;
 }
 
-export function GetStarted({ onNavigateToLogin, isDark }: GetStartedProps) {
+export function GetStarted({ onNavigateToLogin, isDark, toggleTheme }: GetStartedProps) {
   return (
-    <div className="min-h-screen w-full overflow-hidden relative">
+    <div className="min-h-screen w-full overflow-hidden relative flex flex-col">
+      {/* Header */}
+      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={false} />
+      
+      <div className="flex-1 relative">
       {/* Animated Background */}
       <div className="absolute inset-0 z-0">
         <div className={`absolute inset-0 ${isDark ? 'bg-[#020402]' : 'bg-gradient-to-br from-[#A9C5A0] via-[#C5EFCB] to-[#FFD166]'}`} />
@@ -53,9 +60,8 @@ export function GetStarted({ onNavigateToLogin, isDark }: GetStartedProps) {
         />
       </div>
 
-      {/* Theme toggle removed from this page (moved to Header) */}
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pt-24 pb-12">
         {/* Logo/Title Section */}
         <motion.div
           initial={{ opacity: 0, y: -50 }}
@@ -206,6 +212,10 @@ export function GetStarted({ onNavigateToLogin, isDark }: GetStartedProps) {
           ))}
         </motion.div>
       </div>
+      </div>
+      
+      {/* Footer */}
+      <Footer isDark={isDark} />
     </div>
   );
 }

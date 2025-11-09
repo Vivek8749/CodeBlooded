@@ -23,6 +23,7 @@ Modern React + TypeScript frontend for the Riden'Byte platform - helping student
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ installed
 - Backend server running on `http://localhost:8000`
 
@@ -44,6 +45,7 @@ The app will open at `http://localhost:5173`
 ### Environment Variables
 
 Create a `.env` file:
+
 ```env
 VITE_API_URL=http://localhost:8000
 VITE_API_BASE_PATH=/api/v1

@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../utils/authService';
-import type { User } from '../utils/authService';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { authService } from "../utils/authService";
+import type { User } from "../utils/authService";
 
 interface AuthContextType {
   user: User | null;
@@ -19,20 +19,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem("accessToken");
       if (token) {
         try {
           const currentUser = await authService.getCurrentUser();
           setUser(currentUser);
         } catch (error) {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
         }
       }
       setLoading(false);
@@ -42,12 +44,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { user: loggedInUser, token, refreshToken } = await authService.login({
+    const {
+      user: loggedInUser,
+      token,
+      refreshToken,
+    } = await authService.login({
       email,
       password,
     });
-    localStorage.setItem('accessToken', token);
-    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem("accessToken", token);
+    localStorage.setItem("refreshToken", refreshToken);
     setUser(loggedInUser);
   };
 
@@ -58,9 +64,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     phone?: string;
     studentId?: string;
   }) => {
-    const { user: newUser, token, refreshToken } = await authService.signup(data);
-    localStorage.setItem('accessToken', token);
-    localStorage.setItem('refreshToken', refreshToken);
+    const {
+      user: newUser,
+      token,
+      refreshToken,
+    } = await authService.signup(data);
+    localStorage.setItem("accessToken", token);
+    localStorage.setItem("refreshToken", refreshToken);
     setUser(newUser);
   };
 
@@ -68,10 +78,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       setUser(null);
     }
   };
@@ -95,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
