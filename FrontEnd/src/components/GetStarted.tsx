@@ -72,7 +72,7 @@ export function GetStarted({ onNavigateToLogin, isDark }: GetStartedProps) {
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="inline-block mb-4"
+            className="inline-block mt-6 mb-4"
           >
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md ${
               isDark ? 'bg-[#1A1F1A]' : 'bg-white/90 shadow-lg'
