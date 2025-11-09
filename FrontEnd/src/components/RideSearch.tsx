@@ -23,10 +23,22 @@ interface RideSearchProps {
   isDark: boolean;
   toggleTheme: () => void;
   onNavigateBack: () => void;
-  onNavigateToDetail: () => void;
+  onNavigateToDetail: (rideId?: string) => void;
+  onNavigateToCreateRide?: () => void;
+  onNavigateToDashboard?: () => void;
+  onNavigateToFoodSearch?: () => void;
 }
 
-export function RideSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDetail }: RideSearchProps) {
+export function RideSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDetail, onNavigateToCreateRide, onNavigateToDashboard, onNavigateToFoodSearch }: RideSearchProps) {
+  const handleNavigate = (page: string) => {
+    if (page === 'dashboard') {
+      onNavigateToDashboard?.();
+    } else if (page === 'rides') {
+      // Already on rides page, do nothing
+    } else if (page === 'food') {
+      onNavigateToFoodSearch?.();
+    }
+  };
   const [originQuery, setOriginQuery] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
 
@@ -98,7 +110,7 @@ export function RideSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
   return (
     <div className="min-h-screen w-full overflow-hidden relative flex flex-col">
       {/* Header */}
-      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} />
+      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} onNavigate={handleNavigate} />
       
       <div className="flex-1 relative">
         {/* Animated Background */}
@@ -429,7 +441,7 @@ export function RideSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
                       transition={{ duration: 0.2 }}
                     >
                       <Button
-                        onClick={onNavigateToDetail}
+                        onClick={() => onNavigateToDetail(ride.id.toString())}
                         className={`rounded-full shadow-md ${
                           isDark 
                             ? 'bg-gradient-to-r from-[#FF7F50] to-[#FFD166] hover:from-[#FFD166] hover:to-[#FF7F50] text-white' 
@@ -458,6 +470,7 @@ export function RideSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
               transition={{ duration: 0.2 }}
             >
               <Button
+                onClick={onNavigateToCreateRide}
                 className={`rounded-full px-8 py-6 text-lg shadow-lg ${
                   isDark 
                     ? 'bg-gradient-to-r from-[#FF7F50] to-[#FFD166] hover:from-[#FFD166] hover:to-[#FF7F50] text-white' 

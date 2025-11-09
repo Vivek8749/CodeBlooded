@@ -8,9 +8,12 @@ interface HeaderProps {
   toggleTheme: () => void;
   isAuthenticated?: boolean;
   onNavigate?: (page: string) => void;
+  onScrollToFeatures?: () => void;
+  onScrollToHowItWorks?: () => void;
+  onScrollToAbout?: () => void;
 }
 
-export function Header({ isDark, toggleTheme, isAuthenticated = false, onNavigate }: HeaderProps) {
+export function Header({ isDark, toggleTheme, isAuthenticated = false, onNavigate, onScrollToFeatures, onScrollToHowItWorks, onScrollToAbout }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = isAuthenticated 
@@ -23,7 +26,7 @@ export function Header({ isDark, toggleTheme, isAuthenticated = false, onNavigat
     : [
         { label: "Features", value: "features" },
         { label: "How It Works", value: "how-it-works" },
-        { label: "About", value: "about" },
+        { label: "Our Team", value: "about" },
       ];
 
   return (
@@ -69,7 +72,17 @@ export function Header({ isDark, toggleTheme, isAuthenticated = false, onNavigat
             {navItems.map((item) => (
               <button
                 key={item.value}
-                onClick={() => onNavigate?.(item.value)}
+                onClick={() => {
+                  if (item.value === 'features' && onScrollToFeatures) {
+                    onScrollToFeatures();
+                  } else if (item.value === 'how-it-works' && onScrollToHowItWorks) {
+                    onScrollToHowItWorks();
+                  } else if (item.value === 'about' && onScrollToAbout) {
+                    onScrollToAbout();
+                  } else {
+                    onNavigate?.(item.value);
+                  }
+                }}
                 className={`${
                   isDark ? 'text-[#C5EFCB] hover:text-[#F4B400]' : 'text-[#020402] hover:text-[#FF7F50]'
                 } transition-colors duration-300 relative group`}
@@ -86,19 +99,6 @@ export function Header({ isDark, toggleTheme, isAuthenticated = false, onNavigat
           <div className="flex items-center gap-3">
             {isAuthenticated && (
               <>
-                {/* Search Button */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`hidden md:flex p-2 rounded-full backdrop-blur-md ${
-                    isDark 
-                      ? 'bg-[#020402]/40 hover:bg-[#3A463A]/60 border-[#3A463A]/50' 
-                      : 'bg-white/40 hover:bg-white/60 border-white/60'
-                  } border transition-all duration-300`}
-                >
-                  <Search className={`w-5 h-5 ${isDark ? 'text-[#C5EFCB]' : 'text-[#758173]'}`} />
-                </motion.button>
-
                 {/* Notifications */}
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -113,19 +113,6 @@ export function Header({ isDark, toggleTheme, isAuthenticated = false, onNavigat
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#FF7F50] rounded-full text-white text-xs flex items-center justify-center">
                     3
                   </span>
-                </motion.button>
-
-                {/* Profile */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`hidden md:flex p-2 rounded-full backdrop-blur-md ${
-                    isDark 
-                      ? 'bg-[#020402]/40 hover:bg-[#3A463A]/60 border-[#3A463A]/50' 
-                      : 'bg-white/40 hover:bg-white/60 border-white/60'
-                  } border transition-all duration-300`}
-                >
-                  <User className={`w-5 h-5 ${isDark ? 'text-[#C5EFCB]' : 'text-[#758173]'}`} />
                 </motion.button>
               </>
             )}
@@ -189,7 +176,15 @@ export function Header({ isDark, toggleTheme, isAuthenticated = false, onNavigat
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
                   onClick={() => {
-                    onNavigate?.(item.value);
+                    if (item.value === 'features' && onScrollToFeatures) {
+                      onScrollToFeatures();
+                    } else if (item.value === 'how-it-works' && onScrollToHowItWorks) {
+                      onScrollToHowItWorks();
+                    } else if (item.value === 'about' && onScrollToAbout) {
+                      onScrollToAbout();
+                    } else {
+                      onNavigate?.(item.value);
+                    }
                     setIsMobileMenuOpen(false);
                   }}
                   className={`w-full text-left px-4 py-3 rounded-lg ${
@@ -211,31 +206,11 @@ export function Header({ isDark, toggleTheme, isAuthenticated = false, onNavigat
                         : 'text-[#020402] hover:bg-white/40'
                     } transition-colors duration-300 flex items-center gap-3`}
                   >
-                    <Search className="w-5 h-5" />
-                    Search
-                  </button>
-                  <button
-                    className={`w-full text-left px-4 py-3 rounded-lg ${
-                      isDark 
-                        ? 'text-[#C5EFCB] hover:bg-[#3A463A]/30' 
-                        : 'text-[#020402] hover:bg-white/40'
-                    } transition-colors duration-300 flex items-center gap-3`}
-                  >
                     <Bell className="w-5 h-5" />
                     Notifications
                     <span className="ml-auto w-5 h-5 bg-[#FF7F50] rounded-full text-white text-xs flex items-center justify-center">
                       3
                     </span>
-                  </button>
-                  <button
-                    className={`w-full text-left px-4 py-3 rounded-lg ${
-                      isDark 
-                        ? 'text-[#C5EFCB] hover:bg-[#3A463A]/30' 
-                        : 'text-[#020402] hover:bg-white/40'
-                    } transition-colors duration-300 flex items-center gap-3`}
-                  >
-                    <User className="w-5 h-5" />
-                    Profile
                   </button>
                 </div>
               )}

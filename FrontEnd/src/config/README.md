@@ -11,11 +11,13 @@ The frontend uses Vite environment variables. Create a `.env` file in the fronte
 ### Setup
 
 1. Copy `.env.example` to `.env`:
+
    ```bash
    cp .env.example .env
    ```
 
 2. Update the values in `.env` according to your environment:
+
    ```env
    VITE_API_BASE_URL=http://localhost:8000
    ```
@@ -30,7 +32,7 @@ The frontend uses Vite environment variables. Create a `.env` file in the fronte
 The `config/config.ts` file provides a centralized configuration object that can be imported throughout the application:
 
 ```typescript
-import { config } from '@/config/config';
+import { config } from "@/config/config";
 
 // Access API base URL
 const apiUrl = config.api.baseURL;
@@ -41,6 +43,7 @@ const apiUrl = config.api.baseURL;
 Make sure your backend server is running on the configured port (default: 8000).
 
 Backend `.env` configuration:
+
 ```env
 PORT=8000
 CORS_ORIGIN=http://localhost:5173

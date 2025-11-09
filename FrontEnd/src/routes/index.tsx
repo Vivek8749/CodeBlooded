@@ -15,7 +15,7 @@ export function AppRoutes({ isDark, toggleTheme }: AppRoutesProps) {
     <>
       {/* Public Routes */}
       <PublicRoutes isDark={isDark} toggleTheme={toggleTheme} />
-      
+
       {/* Protected Routes */}
       <ProtectedRoutes isDark={isDark} toggleTheme={toggleTheme} />
     </>

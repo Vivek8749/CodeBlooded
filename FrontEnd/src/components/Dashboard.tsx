@@ -3,7 +3,6 @@ import { UtensilsCrossed, Car, ArrowRight } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { useEffect } from "react";
 
 interface DashboardProps {
   isDark: boolean;
@@ -12,25 +11,48 @@ interface DashboardProps {
   onNavigateToRide: () => void;
 }
 
-export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToRide }: DashboardProps) {
-  useEffect(() => {
-    console.log("📊 Dashboard component mounted!");
-    console.log("- isDark:", isDark);
-  }, [isDark]);
+export function Dashboard({
+  isDark,
+  toggleTheme,
+  onNavigateToFood,
+  onNavigateToRide,
+}: DashboardProps) {
+  const handleNavigate = (page: string) => {
+    if (page === "dashboard") {
+      // Already on dashboard, do nothing (it's the main page)
+    } else if (page === "rides") {
+      onNavigateToRide();
+    } else if (page === "food") {
+      onNavigateToFood();
+    }
+  };
 
   return (
     <div className="min-h-screen w-full overflow-hidden relative flex flex-col">
       {/* Header */}
-      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} />
-      
+      <Header
+        isDark={isDark}
+        toggleTheme={toggleTheme}
+        isAuthenticated={true}
+        onNavigate={handleNavigate}
+      />
+
       <div className="flex-1 relative">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">
-          <div className={`absolute inset-0 ${isDark ? 'bg-[#020402]' : 'bg-gradient-to-br from-[#A9C5A0] via-[#C5EFCB] to-[#FFD166]'}`} />
-          
+          <div
+            className={`absolute inset-0 ${
+              isDark
+                ? "bg-[#020402]"
+                : "bg-gradient-to-br from-[#A9C5A0] via-[#C5EFCB] to-[#FFD166]"
+            }`}
+          />
+
           {/* Floating Orbs */}
           <motion.div
-            className={`absolute top-20 left-10 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-[#F4B400]/10' : 'bg-[#F4B400]/30'}`}
+            className={`absolute top-20 left-10 w-96 h-96 rounded-full blur-3xl ${
+              isDark ? "bg-[#F4B400]/10" : "bg-[#F4B400]/30"
+            }`}
             animate={{
               y: [0, 50, 0],
               x: [0, 30, 0],
@@ -42,7 +64,9 @@ export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToR
             }}
           />
           <motion.div
-            className={`absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-[#FF7F50]/10' : 'bg-[#FF7F50]/30'}`}
+            className={`absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl ${
+              isDark ? "bg-[#FF7F50]/10" : "bg-[#FF7F50]/30"
+            }`}
             animate={{
               y: [0, -40, 0],
               x: [0, -25, 0],
@@ -64,10 +88,18 @@ export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToR
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h1 className={`text-5xl md:text-6xl mb-4 ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+            <h1
+              className={`text-5xl md:text-6xl mb-4 ${
+                isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+              }`}
+            >
               What would you like to share?
             </h1>
-            <p className={`text-xl ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+            <p
+              className={`text-xl ${
+                isDark ? "text-[#758173]" : "text-[#020402]/70"
+              }`}
+            >
               Choose a category to get started
             </p>
           </motion.div>
@@ -82,18 +114,20 @@ export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToR
               whileHover={{ scale: 1.02, y: -10 }}
               onClick={onNavigateToFood}
               className={`relative rounded-3xl backdrop-blur-xl overflow-hidden cursor-pointer group ${
-                isDark 
-                  ? 'bg-[#1A1F1A]/60 border-[#3A463A]/50' 
-                  : 'bg-white/30 border-white/60'
+                isDark
+                  ? "bg-[#1A1F1A]/60 border-[#3A463A]/50"
+                  : "bg-white/30 border-white/60"
               } border shadow-2xl`}
             >
               {/* Glass shine effect */}
-              <div className={`absolute inset-0 ${
-                isDark 
-                  ? 'bg-gradient-to-br from-white/5 via-transparent to-transparent' 
-                  : 'bg-gradient-to-br from-white/80 via-white/40 to-transparent'
-              } pointer-events-none z-10`} />
-              
+              <div
+                className={`absolute inset-0 ${
+                  isDark
+                    ? "bg-gradient-to-br from-white/5 via-transparent to-transparent"
+                    : "bg-gradient-to-br from-white/80 via-white/40 to-transparent"
+                } pointer-events-none z-10`}
+              />
+
               {/* 3D Food Image */}
               <div className="relative h-80 overflow-hidden">
                 <motion.div
@@ -120,16 +154,29 @@ export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToR
                   >
                     <UtensilsCrossed className="w-8 h-8 text-white" />
                   </motion.div>
-                  <h2 className={`text-4xl ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                  <h2
+                    className={`text-4xl ${
+                      isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                    }`}
+                  >
                     Food Orders
                   </h2>
                 </div>
-                
-                <p className={`text-lg mb-6 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                  Split delivery costs with students ordering from the same restaurant. Save money and reduce waste together.
+
+                <p
+                  className={`text-lg mb-6 ${
+                    isDark ? "text-[#758173]" : "text-[#020402]/70"
+                  }`}
+                >
+                  Split delivery costs with students ordering from the same
+                  restaurant. Save money and reduce waste together.
                 </p>
 
-                <div className={`flex items-center gap-2 ${isDark ? 'text-[#F4B400]' : 'text-[#FF7F50]'} group-hover:gap-4 transition-all`}>
+                <div
+                  className={`flex items-center gap-2 ${
+                    isDark ? "text-[#F4B400]" : "text-[#FF7F50]"
+                  } group-hover:gap-4 transition-all`}
+                >
                   <span className="text-lg">Explore Food Groups</span>
                   <ArrowRight className="w-6 h-6" />
                 </div>
@@ -138,11 +185,11 @@ export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToR
               {/* Hover Glow Effect */}
               <motion.div
                 className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
-                  isDark 
-                    ? 'bg-gradient-to-t from-[#F4B400]/20 to-transparent' 
-                    : 'bg-gradient-to-t from-[#F4B400]/30 to-transparent'
+                  isDark
+                    ? "bg-gradient-to-t from-[#F4B400]/20 to-transparent"
+                    : "bg-gradient-to-t from-[#F4B400]/30 to-transparent"
                 }`}
-                style={{ pointerEvents: 'none' }}
+                style={{ pointerEvents: "none" }}
               />
             </motion.div>
 
@@ -154,18 +201,20 @@ export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToR
               whileHover={{ scale: 1.02, y: -10 }}
               onClick={onNavigateToRide}
               className={`relative rounded-3xl backdrop-blur-xl overflow-hidden cursor-pointer group ${
-                isDark 
-                  ? 'bg-[#1A1F1A]/60 border-[#3A463A]/50' 
-                  : 'bg-white/30 border-white/60'
+                isDark
+                  ? "bg-[#1A1F1A]/60 border-[#3A463A]/50"
+                  : "bg-white/30 border-white/60"
               } border shadow-2xl`}
             >
               {/* Glass shine effect */}
-              <div className={`absolute inset-0 ${
-                isDark 
-                  ? 'bg-gradient-to-br from-white/5 via-transparent to-transparent' 
-                  : 'bg-gradient-to-br from-white/80 via-white/40 to-transparent'
-              } pointer-events-none z-10`} />
-              
+              <div
+                className={`absolute inset-0 ${
+                  isDark
+                    ? "bg-gradient-to-br from-white/5 via-transparent to-transparent"
+                    : "bg-gradient-to-br from-white/80 via-white/40 to-transparent"
+                } pointer-events-none z-10`}
+              />
+
               {/* 3D Car Image */}
               <div className="relative h-80 overflow-hidden">
                 <motion.div
@@ -192,16 +241,29 @@ export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToR
                   >
                     <Car className="w-8 h-8 text-white" />
                   </motion.div>
-                  <h2 className={`text-4xl ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                  <h2
+                    className={`text-4xl ${
+                      isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                    }`}
+                  >
                     Shared Rides
                   </h2>
                 </div>
-                
-                <p className={`text-lg mb-6 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                  Find students traveling to the same destination. Share rides, split costs, and make your commute more affordable.
+
+                <p
+                  className={`text-lg mb-6 ${
+                    isDark ? "text-[#758173]" : "text-[#020402]/70"
+                  }`}
+                >
+                  Find students traveling to the same destination. Share rides,
+                  split costs, and make your commute more affordable.
                 </p>
 
-                <div className={`flex items-center gap-2 ${isDark ? 'text-[#FF7F50]' : 'text-[#F4B400]'} group-hover:gap-4 transition-all`}>
+                <div
+                  className={`flex items-center gap-2 ${
+                    isDark ? "text-[#FF7F50]" : "text-[#F4B400]"
+                  } group-hover:gap-4 transition-all`}
+                >
                   <span className="text-lg">Explore Ride Groups</span>
                   <ArrowRight className="w-6 h-6" />
                 </div>
@@ -210,11 +272,11 @@ export function Dashboard({ isDark, toggleTheme, onNavigateToFood, onNavigateToR
               {/* Hover Glow Effect */}
               <motion.div
                 className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
-                  isDark 
-                    ? 'bg-gradient-to-t from-[#FF7F50]/20 to-transparent' 
-                    : 'bg-gradient-to-t from-[#FF7F50]/30 to-transparent'
+                  isDark
+                    ? "bg-gradient-to-t from-[#FF7F50]/20 to-transparent"
+                    : "bg-gradient-to-t from-[#FF7F50]/30 to-transparent"
                 }`}
-                style={{ pointerEvents: 'none' }}
+                style={{ pointerEvents: "none" }}
               />
             </motion.div>
           </div>

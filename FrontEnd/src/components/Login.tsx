@@ -144,7 +144,7 @@ export function Login({ onNavigateBack, isDark, toggleTheme }: LoginProps) {
                     isDark ? "text-[#C5EFCB]" : "text-[#020402]"
                   }`}
                 >
-                  Login
+                  Riden'Byte
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0 }}
@@ -327,13 +327,13 @@ export function Login({ onNavigateBack, isDark, toggleTheme }: LoginProps) {
                     className={`w-full py-6 rounded-full ${
                       isDark
                         ? "bg-[#F4B400] hover:bg-[#FFD166] text-[#020402]"
-                        : "bg-linear-to-r from-[#F4B400] to-[#FF7F50] hover:from-[#FFD166] hover:to-[#FF7F50] text-[#020402]"
+                        : "bg-gradient-to-r from-[#F4B400] to-[#FF7F50] hover:from-[#FFD166] hover:to-[#FF7F50] text-[#020402]"
                     } transition-all duration-300 shadow-lg hover:shadow-xl relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     <span className="relative z-10">
                       {isLoading ? "Signing In..." : "Sign In"}
                     </span>
-                    <div className="absolute inset-0 bg-linear-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </Button>
                 </motion.div>
               </form>
