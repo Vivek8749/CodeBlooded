@@ -12,6 +12,20 @@ dist
 dist-ssr
 *.local
 
+.env
+.env.*.local
+.env.test
+.env.production
+.env.production.local
+# Build output
+/build
+/.next
+/out
+/.nuxt
+/.vuepress/dist
+/.serverless
+/.vercel
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
