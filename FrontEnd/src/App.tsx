@@ -1,9 +1,18 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 import { GetStarted } from "./components/GetStarted";
 import { Login } from "./components/Login";
 import { Signup } from "./components/Signup";
-import { Header } from "./components/ui/header";
+import { Dashboard } from "./components/Dashboard";
+import { FoodSearch } from "./components/FoodSearch";
+import { RideSearch } from "./components/RideSearch";
+import { FoodDetail } from "./components/FoodDetail";
+import { RideDetail } from "./components/RideDetail";
 
 function AppContent() {
   const [isDark, setIsDark] = useState(true);
@@ -23,40 +32,86 @@ function AppContent() {
 
   return (
     <div className="size-full">
-      <Header 
-        isDark={isDark} 
-        toggleTheme={toggleTheme}
-        onHomeClick={() => navigate("/")}
-        onSignInClick={() => navigate("/login")} 
-      />
       <Routes>
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
-            <GetStarted 
-              onNavigateToLogin={() => navigate("/login")} 
+            <GetStarted
+              onNavigateToLogin={() => navigate("/login")}
               isDark={isDark}
+              toggleTheme={toggleTheme}
             />
-          } 
+          }
         />
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
-            <Login 
-              onNavigateBack={() => navigate("/")} 
-              onNavigateToSignup={() => navigate("/signup")}
-              isDark={isDark}
-            />
-          } 
-        />
-        <Route 
-          path="/signup" 
-          element={
-            <Signup
+            <Login
               onNavigateBack={() => navigate("/")}
+              onNavigateToDashboard={() => navigate("/dashboard")}
               isDark={isDark}
+              toggleTheme={toggleTheme}
             />
-          } 
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <Signup onNavigateBack={() => navigate("/")} isDark={isDark} />
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <Dashboard
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateToFood={() => navigate("/food-search")}
+              onNavigateToRide={() => navigate("/ride-search")}
+            />
+          }
+        />
+        <Route
+          path="/food-search"
+          element={
+            <FoodSearch
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateBack={() => navigate("/dashboard")}
+              onNavigateToDetail={() => navigate("/food-detail")}
+            />
+          }
+        />
+        <Route
+          path="/ride-search"
+          element={
+            <RideSearch
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateBack={() => navigate("/dashboard")}
+              onNavigateToDetail={() => navigate("/ride-detail")}
+            />
+          }
+        />
+        <Route
+          path="/food-detail"
+          element={
+            <FoodDetail
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateBack={() => navigate("/food-search")}
+            />
+          }
+        />
+        <Route
+          path="/ride-detail"
+          element={
+            <RideDetail
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateBack={() => navigate("/ride-search")}
+            />
+          }
         />
       </Routes>
     </div>
@@ -65,8 +120,8 @@ function AppContent() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <AppContent />
-    </BrowserRouter>
+    </Router>
   );
 }

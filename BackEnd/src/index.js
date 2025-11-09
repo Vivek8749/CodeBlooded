@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import app from "./app.js";
 import { connectDB, disconnectDB } from "./db/index.js";
 import { PORT } from "./constants.js";
+import { startExpiryChecker } from "./utils/rideExpiryChecker.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -21,6 +22,9 @@ function handleFatal(error, code = 1) {
 async function startServer() {
   try {
     await connectDB();
+
+    // Start the ride expiry checker (checks every 5 minutes)
+    startExpiryChecker(5);
 
     const server = app.listen(port, () => {
       log.info(`Server listening on port ${port}`);

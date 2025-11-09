@@ -8,31 +8,25 @@ const rideSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    from: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    to: {
+    restaurant: {
       type: String,
       required: true,
       trim: true,
       index: true,
     },
-    vehicleDetails: {
-      type: String,
-      trim: true,
-    },
-    maxSeats: {
+    MinSpent: {
       type: Number,
       required: true,
-      min: 1,
-      max: 10,
+      index: true,
     },
-    currentSeats: {
+    Offer: [{
+        ispercentage: Boolean,
+        amount: Number
+    }],
+    currentParticipants: {
       type: Number,
       required: true,
-      default: 0,
+      default: 1,
     },
     participants: [
       {

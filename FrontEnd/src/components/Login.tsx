@@ -8,11 +8,12 @@ import { Header } from "./Header";
 
 interface LoginProps {
   onNavigateBack: () => void;
+  onNavigateToDashboard: () => void;
   isDark: boolean;
   toggleTheme: () => void;
 }
 
-export function Login({ onNavigateBack, isDark, toggleTheme }: LoginProps) {
+export function Login({ onNavigateBack, onNavigateToDashboard, isDark, toggleTheme }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +21,8 @@ export function Login({ onNavigateBack, isDark, toggleTheme }: LoginProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Login attempted with:", { email, password });
+    // Navigate to dashboard after login
+    onNavigateToDashboard();
   };
 
   return (

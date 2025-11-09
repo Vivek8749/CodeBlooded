@@ -48,7 +48,7 @@ const createRide = asyncHandler(async (req, res) => {
 
 // Search rides by destination
 const searchRides = asyncHandler(async (req, res) => {
-  const { to, date } = req.query;
+  const { to, date, includeExpired } = req.query;
 
   if (!to) {
     throw new ApiError(400, "Destination (to) is required for search");
@@ -56,8 +56,13 @@ const searchRides = asyncHandler(async (req, res) => {
 
   const query = {
     to: { $regex: to, $options: "i" },
-    expiryTime: { $gt: new Date() }, // Only show rides that haven't expired
   };
+
+  // By default, exclude expired rides unless explicitly requested
+  if (includeExpired !== "true") {
+    query.expired = false;
+    query.expiryTime = { $gt: new Date() };
+  }
 
   // Filter by date if provided
   if (date) {
@@ -93,6 +98,9 @@ const getRideDetails = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Ride not found");
   }
 
+  // Check and update expiry status if needed
+  await ride.checkAndUpdateExpiry();
+
   // Calculate split for response
   const splitAmount = ride.calculateSplit();
   const isUserCreator =
@@ -106,7 +114,7 @@ const getRideDetails = asyncHandler(async (req, res) => {
     payment: {
       splitAmount,
       totalParticipants: ride.participants.length + 1,
-      isExpired: ride.isExpired,
+      isExpired: ride.expired,
       userAmount: isUserCreator || userParticipant ? splitAmount : null,
     },
   };
@@ -128,8 +136,11 @@ const joinRide = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Ride not found");
   }
 
+  // Check and update expiry status
+  await ride.checkAndUpdateExpiry();
+
   // Check if ride has expired
-  if (ride.isExpired) {
+  if (ride.expired) {
     throw new ApiError(
       400,
       "This ride has expired and is no longer accepting participants"
@@ -179,8 +190,11 @@ const leaveRide = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Ride not found");
   }
 
+  // Check and update expiry status
+  await ride.checkAndUpdateExpiry();
+
   // Check if ride has expired
-  if (ride.isExpired) {
+  if (ride.expired) {
     throw new ApiError(
       400,
       "This ride has expired. You cannot leave now. Please complete payment."

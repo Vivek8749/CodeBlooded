@@ -134,6 +134,7 @@ All ride endpoints require authentication.
   }],
   totalPrice: Number,         // Total cost for the ride
   expiryTime: Date,          // Deadline to join/leave
+  expired: Boolean,          // Auto-set to true when ride expires (default: false)
   notes: String,             // Additional notes (max 500 chars)
   createdAt: Date,           // Auto-generated
   updatedAt: Date            // Auto-generated
@@ -143,7 +144,11 @@ All ride endpoints require authentication.
 **Important Notes:**
 
 - Users can only join or leave before the `expiryTime`
+- The `expired` field is automatically set to `true` when the ride expires
+- Background job runs every 5 minutes to mark expired rides
+- Rides are also checked for expiry on individual API calls
 - After expiry, the ride is locked and payment splits are calculated
+- Expired rides are NOT deleted from the database
 - Payment split = `totalPrice / (participants.length + 1)` (includes creator)
 - Frontend displays the split amount to each participant after expiry
 
@@ -196,12 +201,13 @@ Errors:
 ### Search Rides
 
 ```http
-GET /rides/search?to=Downtown&date=2025-11-10
+GET /rides/search?to=Downtown&date=2025-11-10&includeExpired=false
 Authorization: Bearer {token}
 
 Query Parameters:
 - to (required): Search term for destination
 - date (optional): Filter by creation date (YYYY-MM-DD)
+- includeExpired (optional): Include expired rides (default: false)
 
 Response: 200 OK
 {
@@ -214,6 +220,7 @@ Response: 200 OK
         "from": "...",
         "to": "...",
         "expiryTime": "...",
+        "expired": false,
         "maxSeats": 3,
         "currentSeats": 1,
         "totalPrice": 150,
@@ -225,7 +232,7 @@ Response: 200 OK
   }
 }
 
-Note: Only returns rides that haven't expired yet
+Note: By default, only returns rides that haven't expired (expired: false)
 ```
 
 ### Get User's Rides
