@@ -89,7 +89,7 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme }: GetStarte
           </motion.div>
           
           <h1 className={`text-6xl md:text-8xl mb-4 ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402] drop-shadow-sm'}`}>
-            Riden'Byte
+            RideN'Byte
           </h1>
           <p className={`text-xl md:text-2xl ${isDark ? 'text-[#758173]' : 'text-[#020402]/80'} max-w-2xl mx-auto`}>
             Share rides, split meals, save money. <br />

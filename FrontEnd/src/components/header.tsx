@@ -60,7 +60,7 @@ export function Header({ isDark, toggleTheme, isAuthenticated = false, onNavigat
               <span className="text-[#020402]">R</span>
             </div>
             <span className={`text-xl ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
-              Riden'Byte
+              RideN'Byte
             </span>
           </motion.div>
 
