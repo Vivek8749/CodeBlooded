@@ -517,6 +517,9 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme, scrollToFea
                   skills: ["Express.js", "MongoDB", "Socket.io", "JWT"],
                   icon: Code,
                   color: isDark ? 'from-[#F4B400] to-[#FFD166]' : 'from-[#F4B400] to-[#FF7F50]',
+                  linkedin: "https://www.linkedin.com/in/vivek-mourya",
+                  github: "https://github.com/vivekmourya",
+                  email: "vivek@ridenbyte.com",
                 },
                 {
                   name: "Adarsh Raj",
@@ -524,6 +527,9 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme, scrollToFea
                   skills: ["HTML", "CSS", "React", "UI/UX", "Figma"],
                   icon: Palette,
                   color: isDark ? 'from-[#FF7F50] to-[#FFD166]' : 'from-[#FF7F50] to-[#F4B400]',
+                  linkedin: "https://www.linkedin.com/in/adarsh-raj",
+                  github: "https://github.com/adarshraj",
+                  email: "adarsh@ridenbyte.com",
                 },
                 {
                   name: "Aryan Kumar",
@@ -531,6 +537,9 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme, scrollToFea
                   skills: ["HTML", "CSS", "React", "Canva", "Designing"],
                   icon: Palette,
                   color: isDark ? 'from-[#C5EFCB] to-[#758173]' : 'from-[#A9C5A0] to-[#C6DEC6]',
+                  linkedin: "https://www.linkedin.com/in/aryan-kumar",
+                  github: "https://github.com/aryankumar",
+                  email: "aryan@ridenbyte.com",
                 },
                 {
                   name: "Raj Shreya",
@@ -538,6 +547,9 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme, scrollToFea
                   skills: ["React", "Frontend", "Presentation", "Documentation"],
                   icon: PresentationIcon,
                   color: isDark ? 'from-[#F4B400] to-[#C5EFCB]' : 'from-[#F4B400] to-[#A9C5A0]',
+                  linkedin: "https://www.linkedin.com/in/raj-shreya",
+                  github: "https://github.com/rajshreya",
+                  email: "shreya@ridenbyte.com",
                 },
               ].map((member, index) => (
                 <motion.div
@@ -588,7 +600,10 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme, scrollToFea
                     
                     {/* Social Links */}
                     <div className="flex gap-3 pt-4 border-t border-[#3A463A]/30">
-                      <motion.button
+                      <motion.a
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         className={`p-2 rounded-full ${
@@ -598,8 +613,11 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme, scrollToFea
                         } transition-all duration-300`}
                       >
                         <Linkedin className="w-4 h-4" />
-                      </motion.button>
-                      <motion.button
+                      </motion.a>
+                      <motion.a
+                        href={member.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         className={`p-2 rounded-full ${
@@ -609,8 +627,9 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme, scrollToFea
                         } transition-all duration-300`}
                       >
                         <Github className="w-4 h-4" />
-                      </motion.button>
-                      <motion.button
+                      </motion.a>
+                      <motion.a
+                        href={`mailto:${member.email}`}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         className={`p-2 rounded-full ${
@@ -620,7 +639,7 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme, scrollToFea
                         } transition-all duration-300`}
                       >
                         <Mail className="w-4 h-4" />
-                      </motion.button>
+                      </motion.a>
                     </div>
                   </div>
                 </motion.div>
