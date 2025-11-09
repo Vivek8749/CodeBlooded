@@ -1,14 +1,4 @@
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
-import { GetStarted } from "./components/GetStarted";
-import { Login } from "./components/Login";
-
-type Page = "get-started" | "login";
-
-export default function App() {
-  const [currentPage, setCurrentPage] = useState<Page>("get-started");
-  const [isDark, setIsDark] = useState(true);
-=======
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { GetStarted } from "./components/GetStarted";
 import { Login } from "./components/Login";
@@ -18,7 +8,6 @@ import { Header } from "./components/ui/header";
 function AppContent() {
   const [isDark, setIsDark] = useState(true);
   const navigate = useNavigate();
->>>>>>> 0962a4c (sign in and sin up page done)
 
   useEffect(() => {
     if (isDark) {
@@ -32,35 +21,6 @@ function AppContent() {
     setIsDark(!isDark);
   };
 
-<<<<<<< HEAD
-  const navigateToLogin = () => {
-    setCurrentPage("login");
-  };
-
-  const navigateToGetStarted = () => {
-    setCurrentPage("get-started");
-  };
-
-  return (
-    <div className="size-full">
-      {currentPage === "get-started" && (
-        <GetStarted 
-          onNavigateToLogin={navigateToLogin} 
-          isDark={isDark}
-          toggleTheme={toggleTheme}
-        />
-      )}
-      {currentPage === "login" && (
-        <Login 
-          onNavigateBack={navigateToGetStarted} 
-          isDark={isDark}
-          toggleTheme={toggleTheme}
-        />
-      )}
-    </div>
-  );
-}
-=======
   return (
     <div className="size-full">
       <Header 
@@ -110,4 +70,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
->>>>>>> 0962a4c (sign in and sin up page done)

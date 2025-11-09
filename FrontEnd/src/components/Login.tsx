@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { ArrowLeft, Mail, Lock, Eye, EyeOff, Moon, Sun } from "lucide-react";
+import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 interface LoginProps {
   onNavigateBack: () => void;
+  onNavigateToSignup: () => void;
   isDark: boolean;
-  toggleTheme: () => void;
 }
 
-export function Login({ onNavigateBack, isDark, toggleTheme }: LoginProps) {
+export function Login({ onNavigateBack, onNavigateToSignup, isDark }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,26 +71,7 @@ export function Login({ onNavigateBack, isDark, toggleTheme }: LoginProps) {
         <ArrowLeft className={`w-5 h-5 ${isDark ? 'text-[#C5EFCB]' : 'text-[#758173]'} group-hover:translate-x-[-2px] transition-transform relative z-10`} />
       </button>
 
-      {/* Theme Toggle */}
-      <button
-        onClick={toggleTheme}
-        className={`absolute top-6 right-6 z-50 p-3 rounded-full backdrop-blur-xl ${
-          isDark 
-            ? 'bg-[#1A1F1A]/70 hover:bg-[#3A463A]/70 border-[#3A463A]/50' 
-            : 'bg-white/40 hover:bg-white/60 border-white/60 shadow-[0_8px_32px_0_rgba(169,197,160,0.2)]'
-        } border transition-all duration-300 relative overflow-hidden`}
-      >
-        <div className={`absolute inset-0 ${
-          isDark 
-            ? 'bg-gradient-to-br from-white/5 to-transparent' 
-            : 'bg-gradient-to-br from-white/60 to-transparent'
-        }`} />
-        {isDark ? (
-          <Sun className="w-5 h-5 text-[#F4B400] relative z-10" />
-        ) : (
-          <Moon className="w-5 h-5 text-[#758173] relative z-10" />
-        )}
-      </button>
+      {/* Theme toggle removed from this page (moved to Header) */}
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
@@ -267,12 +248,13 @@ export function Login({ onNavigateBack, isDark, toggleTheme }: LoginProps) {
           >
             <p className={`${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
               Don't have an account?{" "}
-              <a
-                href="#"
-                className={`${isDark ? 'text-[#F4B400] hover:text-[#FFD166]' : 'text-[#FF7F50] hover:text-[#F4B400]'} transition-colors`}
+              <button
+                type="button"
+                onClick={onNavigateToSignup}
+                className={`${isDark ? 'text-[#F4B400] hover:text-[#FFD166]' : 'text-[#FF7F50] hover:text-[#F4B400]'} transition-colors underline`}
               >
                 Sign up
-              </a>
+              </button>
             </p>
           </motion.div>
 
