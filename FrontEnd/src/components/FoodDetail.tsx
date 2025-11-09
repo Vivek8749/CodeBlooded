@@ -30,9 +30,21 @@ interface FoodDetailProps {
   toggleTheme: () => void;
   onNavigateBack: () => void;
   orderDetails?: any;
+  onNavigateToDashboard?: () => void;
+  onNavigateToRideSearch?: () => void;
+  onNavigateToFoodSearch?: () => void;
 }
 
-export function FoodDetail({ isDark, toggleTheme, onNavigateBack, orderDetails }: FoodDetailProps) {
+export function FoodDetail({ isDark, toggleTheme, onNavigateBack, orderDetails, onNavigateToDashboard, onNavigateToRideSearch, onNavigateToFoodSearch }: FoodDetailProps) {
+  const handleNavigate = (page: string) => {
+    if (page === 'dashboard') {
+      onNavigateToDashboard?.();
+    } else if (page === 'rides') {
+      onNavigateToRideSearch?.();
+    } else if (page === 'food') {
+      onNavigateToFoodSearch?.();
+    }
+  };
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
     { id: 1, sender: "Sarah", text: "Hi everyone! I'm organizing this order from Pizza Palace.", time: "11:30 AM", isOwn: false },
@@ -97,7 +109,7 @@ export function FoodDetail({ isDark, toggleTheme, onNavigateBack, orderDetails }
   return (
     <div className="min-h-screen w-full overflow-hidden relative flex flex-col">
       {/* Header */}
-      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} />
+      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} onNavigate={handleNavigate} />
       
       <div className="flex-1 relative">
         {/* Animated Background */}

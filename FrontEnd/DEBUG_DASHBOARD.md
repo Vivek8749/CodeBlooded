@@ -1,6 +1,7 @@
 # Dashboard Not Rendering - Debugging Guide
 
 ## Issue
+
 The dashboard is not rendering after successful login.
 
 ## Changes Made for Debugging
@@ -8,50 +9,60 @@ The dashboard is not rendering after successful login.
 ### 1. Added Console Logging
 
 #### Navigation (utils/navigation.ts)
+
 - Added logs when login is attempted
 - Shows user data after successful login
 - Shows the target navigation path (`/user/:id/dashboard`)
 
 #### Protected Route (components/ProtectedRoute.tsx)
+
 - Logs when checking token
 - Shows current location path
 - Indicates whether token exists
 - Shows if redirect will happen
 
 #### Dashboard Component (components/Dashboard.tsx)
+
 - Logs when component mounts
 - Shows current theme state
 
 ### 2. Fixed Routing Structure (routes/index.tsx)
+
 - Changed from nested Routes to direct component rendering
 - This prevents route matching conflicts between public and protected routes
 
 ## How to Debug
 
 ### Step 1: Start Backend Server
+
 ```bash
 cd BackEnd
 npm run dev
 ```
+
 Make sure it's running on port 8000.
 
 ### Step 2: Start Frontend Server
+
 ```bash
 cd FrontEnd
 npm run dev
 ```
 
 ### Step 3: Open Browser Console
+
 1. Open http://localhost:5173
 2. Open Developer Tools (F12)
 3. Go to Console tab
 
 ### Step 4: Test Login
+
 1. Navigate to Login page
 2. Enter credentials
 3. Watch console for these logs:
 
 Expected flow:
+
 ```
 🔐 Attempting login with: user@example.com
 ✅ Login successful, user data: {user: {...}}
@@ -67,23 +78,29 @@ Expected flow:
 ## Common Issues & Solutions
 
 ### Issue 1: "❌ No token found, redirecting to login"
+
 **Problem**: Token not being saved after login
 **Solution**: Check `handleLogin` in `api/userApi.ts` - make sure `setToken()` is called
 
 ### Issue 2: Backend connection error
+
 **Problem**: Cannot connect to http://localhost:8000
 **Solutions**:
+
 - Check if backend server is running
 - Verify `.env` file has `VITE_API_BASE_URL=http://localhost:8000`
 - Check backend CORS settings allow frontend origin
 
 ### Issue 3: Dashboard doesn't mount
+
 **Problem**: Protected route redirects despite having token
 **Solution**: Check token format and localStorage
 
 ### Issue 4: "404 Not Found" on API calls
+
 **Problem**: API endpoint doesn't exist
-**Solution**: 
+**Solution**:
+
 - Check backend routes are registered
 - Verify API path is `/api/v1/users/login`
 - Check backend console for errors
@@ -110,9 +127,11 @@ After identifying the issue:
 ## Remove Debug Logs
 
 Once issue is resolved, remove console.log statements from:
+
 - `utils/navigation.ts`
 - `components/ProtectedRoute.tsx`
 - `components/Dashboard.tsx`
 
 And delete:
+
 - `components/DebugRoute.tsx` (if not needed)

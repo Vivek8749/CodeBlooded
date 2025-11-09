@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { useState, useRef, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { 
   ArrowLeft,
   Send,
@@ -27,9 +28,24 @@ interface RideDetailProps {
   isDark: boolean;
   toggleTheme: () => void;
   onNavigateBack: () => void;
+  onNavigateToDashboard?: () => void;
+  onNavigateToRideSearch?: () => void;
+  onNavigateToFoodSearch?: () => void;
 }
 
-export function RideDetail({ isDark, toggleTheme, onNavigateBack }: RideDetailProps) {
+export function RideDetail({ isDark, toggleTheme, onNavigateBack, onNavigateToDashboard, onNavigateToRideSearch, onNavigateToFoodSearch }: RideDetailProps) {
+  const { rideId } = useParams<{ rideId: string }>();
+  
+  const handleNavigate = (page: string) => {
+    if (page === 'dashboard') {
+      onNavigateToDashboard?.();
+    } else if (page === 'rides') {
+      onNavigateToRideSearch?.();
+    } else if (page === 'food') {
+      onNavigateToFoodSearch?.();
+    }
+  };
+  
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
     { id: 1, sender: "Jessica", text: "Hey everyone! I'm the driver for today's ride.", time: "10:30 AM", isOwn: false },
@@ -40,6 +56,11 @@ export function RideDetail({ isDark, toggleTheme, onNavigateBack }: RideDetailPr
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(45);
+
+  // Log the rideId for debugging
+  useEffect(() => {
+    console.log("RideDetail - Current rideId:", rideId);
+  }, [rideId]);
 
   // Simulate live tracking progress
   useEffect(() => {
@@ -86,7 +107,7 @@ export function RideDetail({ isDark, toggleTheme, onNavigateBack }: RideDetailPr
   return (
     <div className="min-h-screen w-full overflow-hidden relative flex flex-col">
       {/* Header */}
-      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} />
+      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} onNavigate={handleNavigate} />
       
       <div className="flex-1 relative">
         {/* Animated Background */}
@@ -270,17 +291,17 @@ export function RideDetail({ isDark, toggleTheme, onNavigateBack }: RideDetailPr
                     </div>
                   </div>
 
-                  {/* Driver & Cost Information */}
+                  {/* Organizer & Cost Information */}
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <User className={`w-5 h-5 mt-1 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`} />
                       <div className="flex-1">
-                        <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>Driver</p>
-                        <p className={`${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>{rideDetails.driver}</p>
+                        <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>Organizer</p>
+                        <p className={`${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>{rideDetails.organizer}</p>
                         <div className="flex items-center gap-1 mt-1">
                           <Star className="w-4 h-4 fill-[#F4B400] text-[#F4B400]" />
                           <span className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                            {rideDetails.driverRating}
+                            {rideDetails.organizerRating}
                           </span>
                         </div>
                       </div>
@@ -289,7 +310,7 @@ export function RideDetail({ isDark, toggleTheme, onNavigateBack }: RideDetailPr
                       <Phone className={`w-5 h-5 mt-1 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`} />
                       <div className="flex-1">
                         <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>Contact</p>
-                        <p className={`${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>{rideDetails.driverPhone}</p>
+                        <p className={`${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>{rideDetails.organizerPhone}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">

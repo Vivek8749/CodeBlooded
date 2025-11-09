@@ -23,9 +23,21 @@ interface FoodSearchProps {
   toggleTheme: () => void;
   onNavigateBack: () => void;
   onNavigateToDetail: () => void;
+  onNavigateToDashboard?: () => void;
+  onNavigateToRideSearch?: () => void;
+  onNavigateToCreateFood?: () => void;
 }
 
-export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDetail }: FoodSearchProps) {
+export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDetail, onNavigateToDashboard, onNavigateToRideSearch, onNavigateToCreateFood }: FoodSearchProps) {
+  const handleNavigate = (page: string) => {
+    if (page === 'dashboard') {
+      onNavigateToDashboard?.();
+    } else if (page === 'rides') {
+      onNavigateToRideSearch?.();
+    } else if (page === 'food') {
+      // Already on food page, do nothing
+    }
+  };
   const [searchQuery, setSearchQuery] = useState("");
 
   // Mock data for available food orders
@@ -98,7 +110,7 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
   return (
     <div className="min-h-screen w-full overflow-hidden relative flex flex-col">
       {/* Header */}
-      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} />
+      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} onNavigate={handleNavigate} />
       
       <div className="flex-1 relative">
         {/* Animated Background */}
@@ -365,6 +377,7 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
               transition={{ duration: 0.2 }}
             >
               <Button
+                onClick={onNavigateToCreateFood}
                 className={`rounded-full px-8 py-6 text-lg shadow-lg ${
                   isDark 
                     ? 'bg-gradient-to-r from-[#F4B400] to-[#FFD166] hover:from-[#FFD166] hover:to-[#F4B400] text-[#020402]' 
