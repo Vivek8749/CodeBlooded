@@ -1,14 +1,13 @@
 import { motion } from "motion/react";
-import { Car, UtensilsCrossed, Users, Sparkles, Moon, Sun } from "lucide-react";
+import { Car, UtensilsCrossed, Users, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface GetStartedProps {
   onNavigateToLogin: () => void;
   isDark: boolean;
-  toggleTheme: () => void;
 }
 
-export function GetStarted({ onNavigateToLogin, isDark, toggleTheme }: GetStartedProps) {
+export function GetStarted({ onNavigateToLogin, isDark }: GetStartedProps) {
   return (
     <div className="min-h-screen w-full overflow-hidden relative">
       {/* Animated Background */}
@@ -54,20 +53,7 @@ export function GetStarted({ onNavigateToLogin, isDark, toggleTheme }: GetStarte
         />
       </div>
 
-      {/* Theme Toggle */}
-      <button
-        onClick={toggleTheme}
-        className={`absolute top-6 right-6 z-50 p-3 rounded-full backdrop-blur-md ${
-          isDark ? 'bg-[#1A1F1A] hover:bg-[#3A463A]' : 'bg-white/80 hover:bg-white shadow-lg'
-        } border ${isDark ? 'border-[#3A463A]' : 'border-[#A9C5A0]/50'} transition-all duration-300`}
-      >
-        {isDark ? (
-          <Sun className="w-5 h-5 text-[#F4B400]" />
-        ) : (
-          <Moon className="w-5 h-5 text-[#758173]" />
-        )}
-      </button>
-
+      {/* Theme toggle removed from this page (moved to Header) */}
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6">
         {/* Logo/Title Section */}

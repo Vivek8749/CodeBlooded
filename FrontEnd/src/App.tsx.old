@@ -1,0 +1,67 @@
+import { useState, useEffect } from "react";
+import { GetStarted } from "./components/GetStarted";
+import { Login } from "./components/Login";
+import { Signup } from "./components/Signup";
+import { Header } from "./components/ui/header";
+
+type Page = "get-started" | "login" | "signup";
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState<Page>("get-started");
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    
+  }, [isDark]);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+  };
+
+  const navigateToLogin = () => {
+    setCurrentPage("login");
+  };
+
+  const navigateToGetStarted = () => {
+    setCurrentPage("get-started");
+  };
+
+  const navigateToSignup = () => {
+    setCurrentPage("signup");
+  };
+
+  return (
+    <div className="size-full">
+      <Header 
+        isDark={isDark} 
+        toggleTheme={toggleTheme}
+        onHomeClick={() => setCurrentPage("get-started")}
+        onSignInClick={() => setCurrentPage("login")} 
+      />
+      {currentPage === "get-started" && (
+        <GetStarted 
+          onNavigateToLogin={navigateToLogin} 
+          isDark={isDark}
+        />
+      )}
+      {currentPage === "login" && (
+        <Login 
+          onNavigateBack={navigateToGetStarted} 
+          onNavigateToSignup={navigateToSignup}
+          isDark={isDark}
+        />
+      )}
+      {currentPage === "signup" && (
+        <Signup
+          onNavigateBack={navigateToGetStarted}
+          isDark={isDark}
+        />
+      )}
+    </div>
+  );
+}
