@@ -6,7 +6,10 @@ import { ApiResponse } from "../utils/apiResponse.js";
 // Create a new food order
 const createFoodOrder = asyncHandler(async (req, res) => {
   console.log("🍔 [Create Food Order] Request received");
-  console.log("🍔 [Create Food Order] User:", req.user ? req.user.email : "MISSING");
+  console.log(
+    "🍔 [Create Food Order] User:",
+    req.user ? req.user.email : "MISSING"
+  );
   console.log("🍔 [Create Food Order] Request body:", req.body);
 
   const {
@@ -109,11 +112,7 @@ const searchFoodOrders = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(
-        200,
-        { foodOrders },
-        "Food orders fetched successfully"
-      )
+      new ApiResponse(200, { foodOrders }, "Food orders fetched successfully")
     );
 });
 
@@ -236,10 +235,7 @@ const leaveFoodOrder = asyncHandler(async (req, res) => {
 
   // Check if user is the creator
   if (foodOrder.createdBy.toString() === req.user._id.toString()) {
-    throw new ApiError(
-      400,
-      "Creator cannot leave. Delete the order instead."
-    );
+    throw new ApiError(400, "Creator cannot leave. Delete the order instead.");
   }
 
   // Check if user is a participant

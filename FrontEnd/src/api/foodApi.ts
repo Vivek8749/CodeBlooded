@@ -66,31 +66,41 @@ export interface CreateFoodOrderData {
 }
 
 // Create a new food order
-export const createFoodOrder = async (data: CreateFoodOrderData): Promise<FoodOrder> => {
+export const createFoodOrder = async (
+  data: CreateFoodOrderData
+): Promise<FoodOrder> => {
   const response = await privateAxios.post("/api/v1/food", data);
   return response.data.data.foodOrder;
 };
 
 // Search food orders
-export const searchFoodOrders = async (params: SearchFoodParams): Promise<FoodOrder[]> => {
+export const searchFoodOrders = async (
+  params: SearchFoodParams
+): Promise<FoodOrder[]> => {
   const response = await privateAxios.get("/api/v1/food/search", { params });
   return response.data.data.foodOrders;
 };
 
 // Get specific food order details
-export const getFoodOrderDetails = async (foodOrderId: string): Promise<FoodOrder> => {
+export const getFoodOrderDetails = async (
+  foodOrderId: string
+): Promise<FoodOrder> => {
   const response = await privateAxios.get(`/api/v1/food/${foodOrderId}`);
   return response.data.data.foodOrder;
 };
 
 // Join a food order
-export const joinFoodOrder = async (foodOrderId: string): Promise<FoodOrder> => {
+export const joinFoodOrder = async (
+  foodOrderId: string
+): Promise<FoodOrder> => {
   const response = await privateAxios.post(`/api/v1/food/${foodOrderId}/join`);
   return response.data.data.foodOrder;
 };
 
 // Leave a food order
-export const leaveFoodOrder = async (foodOrderId: string): Promise<FoodOrder> => {
+export const leaveFoodOrder = async (
+  foodOrderId: string
+): Promise<FoodOrder> => {
   const response = await privateAxios.post(`/api/v1/food/${foodOrderId}/leave`);
   return response.data.data.foodOrder;
 };
