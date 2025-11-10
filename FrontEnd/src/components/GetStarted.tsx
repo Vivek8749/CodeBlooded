@@ -68,45 +68,10 @@ export function GetStarted({
 				onScrollToAbout={handleScrollToAbout}
 			/>
 
-      {/* Main Content */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 pt-24 pb-12">
-        {/* Logo/Title Section */}
-        <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center mb-12"
-        >
-          <motion.div
-            animate={{
-              rotate: [0, 5, 0, -5, 0],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="inline-block mb-4"
-          >
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md ${
-              isDark ? 'bg-[#1A1F1A]' : 'bg-white/90 shadow-lg'
-            } border ${isDark ? 'border-[#3A463A]' : 'border-[#FF7F50]/30'}`}>
-              <Sparkles className={`w-5 h-5 ${isDark ? 'text-[#F4B400]' : 'text-[#FF7F50]'}`} />
-              <span className={`${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>Welcome to the Future</span>
-            </div>
-          </motion.div>
-          
-          <h1 className={`text-6xl md:text-8xl mb-4 ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402] drop-shadow-sm'}`}>
-            RideN'Byte
-          </h1>
-          <p className={`text-xl md:text-2xl ${isDark ? 'text-[#758173]' : 'text-[#020402]/80'} max-w-2xl mx-auto`}>
-            Share rides, split meals, save money. <br />
-            The smart way for students to connect.
-          </p>
-        </motion.div>
-
-					{/* Floating Orbs */}
-					<motion.div
+			{/* Background Container */}
+			<div className="absolute inset-0 overflow-hidden">
+				{/* Floating Orbs */}
+				<motion.div
 						className={`absolute top-20 left-10 w-64 h-64 rounded-full blur-3xl ${
 							isDark ? "bg-[#F4B400]/10" : "bg-[#F4B400]/40"
 						}`}
@@ -1027,7 +992,6 @@ export function GetStarted({
 						</motion.div>
 					</div>
 				</div>
-			</div>
 
 			{/* Footer */}
 			<Footer isDark={isDark} />
