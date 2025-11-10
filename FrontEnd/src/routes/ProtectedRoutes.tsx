@@ -5,6 +5,8 @@ import { FoodSearch } from "../components/FoodSearch";
 import { RideSearch } from "../components/RideSearch";
 import { FoodDetail } from "../components/FoodDetail";
 import { RideDetail } from "../components/RideDetail";
+import { CreateRide } from "../components/CreateRide";
+import { CreateFoodOrder } from "../components/CreateFoodOrder";
 
 interface ProtectedRoutesProps {
   isDark: boolean;
@@ -25,11 +27,11 @@ export function ProtectedRoutes({ isDark, toggleTheme }: ProtectedRoutesProps) {
               isDark={isDark}
               toggleTheme={toggleTheme}
               onNavigateToFood={() => {
-                const userId = window.location.pathname.split('/')[2];
+                const userId = window.location.pathname.split("/")[2];
                 navigate(`/user/${userId}/food/search`);
               }}
               onNavigateToRide={() => {
-                const userId = window.location.pathname.split('/')[2];
+                const userId = window.location.pathname.split("/")[2];
                 navigate(`/user/${userId}/rides/search`);
               }}
             />
@@ -62,14 +64,18 @@ export function ProtectedRoutes({ isDark, toggleTheme }: ProtectedRoutesProps) {
               isDark={isDark}
               toggleTheme={toggleTheme}
               onNavigateBack={() => {
-                const userId = window.location.pathname.split('/')[2];
+                const userId = window.location.pathname.split("/")[2];
                 navigate(`/user/${userId}/dashboard`);
               }}
               onNavigateToDetail={(rideId?: string) => {
-                const userId = window.location.pathname.split('/')[2];
+                const userId = window.location.pathname.split("/")[2];
                 if (rideId) {
                   navigate(`/user/${userId}/rides/${rideId}`);
                 }
+              }}
+              onNavigateToCreateRide={() => {
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/rides/create`);
               }}
             />
           </ProtectedRoute>
@@ -85,8 +91,37 @@ export function ProtectedRoutes({ isDark, toggleTheme }: ProtectedRoutesProps) {
               isDark={isDark}
               toggleTheme={toggleTheme}
               onNavigateBack={() => {
-                const userId = window.location.pathname.split('/')[2];
+                const userId = window.location.pathname.split("/")[2];
                 navigate(`/user/${userId}/rides/search`);
+              }}
+            />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Create New Ride */}
+      <Route
+        path="/user/:id/rides/create"
+        element={
+          <ProtectedRoute>
+            <CreateRide
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateBack={() => {
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/rides/search`);
+              }}
+              onNavigateToDashboard={() => {
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/dashboard`);
+              }}
+              onNavigateToRideSearch={() => {
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/rides/search`);
+              }}
+              onNavigateToFoodSearch={() => {
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/food/search`);
               }}
             />
           </ProtectedRoute>
@@ -102,12 +137,18 @@ export function ProtectedRoutes({ isDark, toggleTheme }: ProtectedRoutesProps) {
               isDark={isDark}
               toggleTheme={toggleTheme}
               onNavigateBack={() => {
-                const userId = window.location.pathname.split('/')[2];
+                const userId = window.location.pathname.split("/")[2];
                 navigate(`/user/${userId}/dashboard`);
               }}
-              onNavigateToDetail={() => {
-                const userId = window.location.pathname.split('/')[2];
-                navigate(`/user/${userId}/food/detail`);
+              onNavigateToDetail={(foodOrderId?: string) => {
+                const userId = window.location.pathname.split("/")[2];
+                if (foodOrderId) {
+                  navigate(`/user/${userId}/food/${foodOrderId}`);
+                }
+              }}
+              onNavigateToCreateFood={() => {
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/food/create`);
               }}
             />
           </ProtectedRoute>
@@ -115,14 +156,43 @@ export function ProtectedRoutes({ isDark, toggleTheme }: ProtectedRoutesProps) {
       />
 
       <Route
-        path="/user/:id/food/detail"
+        path="/user/:id/food/:foodOrderId"
         element={
           <ProtectedRoute>
             <FoodDetail
               isDark={isDark}
               toggleTheme={toggleTheme}
               onNavigateBack={() => {
-                const userId = window.location.pathname.split('/')[2];
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/food/search`);
+              }}
+            />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Create New Food Order */}
+      <Route
+        path="/user/:id/food/create"
+        element={
+          <ProtectedRoute>
+            <CreateFoodOrder
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateBack={() => {
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/food/search`);
+              }}
+              onNavigateToDashboard={() => {
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/dashboard`);
+              }}
+              onNavigateToRideSearch={() => {
+                const userId = window.location.pathname.split("/")[2];
+                navigate(`/user/${userId}/rides/search`);
+              }}
+              onNavigateToFoodSearch={() => {
+                const userId = window.location.pathname.split("/")[2];
                 navigate(`/user/${userId}/food/search`);
               }}
             />
@@ -140,6 +210,37 @@ export function ProtectedRoutes({ isDark, toggleTheme }: ProtectedRoutesProps) {
               toggleTheme={toggleTheme}
               onNavigateBack={() => navigate("/dashboard")}
               onNavigateToDetail={() => navigate("/food-detail")}
+              onNavigateToCreateFood={() => navigate("/create-food")}
+            />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/food-detail"
+        element={
+          <ProtectedRoute>
+            <FoodDetail
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateBack={() => navigate("/food-search")}
+            />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Create New Food Order - Legacy Route */}
+      <Route
+        path="/create-food"
+        element={
+          <ProtectedRoute>
+            <CreateFoodOrder
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateBack={() => navigate("/food-search")}
+              onNavigateToDashboard={() => navigate("/dashboard")}
+              onNavigateToRideSearch={() => navigate("/ride-search")}
+              onNavigateToFoodSearch={() => navigate("/food-search")}
             />
           </ProtectedRoute>
         }
@@ -154,6 +255,7 @@ export function ProtectedRoutes({ isDark, toggleTheme }: ProtectedRoutesProps) {
               toggleTheme={toggleTheme}
               onNavigateBack={() => navigate("/dashboard")}
               onNavigateToDetail={() => navigate("/ride-detail")}
+              onNavigateToCreateRide={() => navigate("/create-ride")}
             />
           </ProtectedRoute>
         }
@@ -180,6 +282,22 @@ export function ProtectedRoutes({ isDark, toggleTheme }: ProtectedRoutesProps) {
               isDark={isDark}
               toggleTheme={toggleTheme}
               onNavigateBack={() => navigate("/ride-search")}
+            />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/create-ride"
+        element={
+          <ProtectedRoute>
+            <CreateRide
+              isDark={isDark}
+              toggleTheme={toggleTheme}
+              onNavigateBack={() => navigate("/ride-search")}
+              onNavigateToDashboard={() => navigate("/dashboard")}
+              onNavigateToRideSearch={() => navigate("/ride-search")}
+              onNavigateToFoodSearch={() => navigate("/food-search")}
             />
           </ProtectedRoute>
         }

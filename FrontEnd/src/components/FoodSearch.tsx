@@ -1,34 +1,43 @@
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Search, 
   MapPin, 
   Clock, 
   Users, 
-  DollarSign,
-  Filter,
   ArrowLeft,
   UtensilsCrossed,
-  Star
+  Star,
+  Loader2,
+  AlertCircle,
+  Plus,
 } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { searchFoodOrders, type FoodOrder } from "../api/foodApi";
 
 interface FoodSearchProps {
   isDark: boolean;
   toggleTheme: () => void;
   onNavigateBack: () => void;
-  onNavigateToDetail: () => void;
+  onNavigateToDetail: (foodOrderId?: string) => void;
   onNavigateToDashboard?: () => void;
   onNavigateToRideSearch?: () => void;
   onNavigateToCreateFood?: () => void;
 }
 
-export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDetail, onNavigateToDashboard, onNavigateToRideSearch, onNavigateToCreateFood }: FoodSearchProps) {
+export function FoodSearch({ 
+  isDark, 
+  toggleTheme, 
+  onNavigateBack, 
+  onNavigateToDetail, 
+  onNavigateToDashboard, 
+  onNavigateToRideSearch, 
+  onNavigateToCreateFood 
+}: FoodSearchProps) {
   const handleNavigate = (page: string) => {
     if (page === 'dashboard') {
       onNavigateToDashboard?.();
@@ -38,74 +47,186 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
       // Already on food page, do nothing
     }
   };
-  const [searchQuery, setSearchQuery] = useState("");
 
-  // Mock data for available food orders
-  const availableFoodOrders = [
-    {
-      id: 1,
-      restaurant: "Pizza Palace",
-      cuisine: "Italian",
-      destination: "Campus Dorms",
-      currentMembers: 3,
-      maxMembers: 5,
-      estimatedCost: "$8",
-      originalCost: "$15",
-      deliveryTime: "6:30 PM",
-      image: "https://images.unsplash.com/photo-1626842514556-057dbce0379d?w=400",
-      rating: 4.5,
-      organizer: "Sarah M."
-    },
-    {
-      id: 2,
-      restaurant: "Sushi World",
-      cuisine: "Japanese",
-      destination: "North Campus",
-      currentMembers: 2,
-      maxMembers: 4,
-      estimatedCost: "$12",
-      originalCost: "$20",
-      deliveryTime: "7:00 PM",
-      image: "https://images.unsplash.com/photo-1621871908119-295c8ce5cee4?w=400",
-      rating: 4.8,
-      organizer: "Mike T."
-    },
-    {
-      id: 3,
-      restaurant: "Burger Haven",
-      cuisine: "American",
-      destination: "Main Building",
-      currentMembers: 4,
-      maxMembers: 6,
-      estimatedCost: "$6",
-      originalCost: "$12",
-      deliveryTime: "5:45 PM",
-      image: "https://images.unsplash.com/photo-1747207323834-fe2faaa0b119?w=400",
-      rating: 4.3,
-      organizer: "Alex K."
-    },
-    {
-      id: 4,
-      restaurant: "Thai Spice",
-      cuisine: "Thai",
-      destination: "Library Area",
-      currentMembers: 1,
-      maxMembers: 4,
-      estimatedCost: "$10",
-      originalCost: "$18",
-      deliveryTime: "6:15 PM",
-      image: "https://images.unsplash.com/photo-1604967593834-cfd33202d88e?w=400",
-      rating: 4.6,
-      organizer: "Emma L."
-    },
-  ];
+  const [restaurantQuery, setRestaurantQuery] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
+  const [allFoodOrders, setAllFoodOrders] = useState<FoodOrder[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [showRestaurantSuggestions, setShowRestaurantSuggestions] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [restaurantSuggestions, setRestaurantSuggestions] = useState<string[]>([]);
+  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
-  const filteredOrders = availableFoodOrders.filter(order =>
-    searchQuery === "" ||
-    order.restaurant.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.cuisine.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.destination.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Fetch location suggestions from database
+  const fetchLocationSuggestions = async (query: string, type: 'restaurant' | 'location') => {
+    if (!query.trim() || query.length < 2) {
+      if (type === 'restaurant') setRestaurantSuggestions([]);
+      else setLocationSuggestions([]);
+      return;
+    }
+
+    setLoadingSuggestions(true);
+    try {
+      // Search food orders to get suggestions
+      const orders = await searchFoodOrders({
+        restaurant: type === 'restaurant' ? query : undefined,
+        location: type === 'location' ? query : undefined,
+        includeExpired: false,
+      });
+
+      const locations = new Set<string>();
+      
+      orders.forEach(order => {
+        if (type === 'restaurant' && order.restaurant) {
+          locations.add(order.restaurant);
+        } else if (type === 'location' && order.deliveryLocation) {
+          locations.add(order.deliveryLocation);
+        }
+      });
+
+      const uniqueLocations = Array.from(locations).slice(0, 8);
+      
+      if (type === 'restaurant') {
+        setRestaurantSuggestions(uniqueLocations);
+      } else {
+        setLocationSuggestions(uniqueLocations);
+      }
+    } catch (err) {
+      console.error('Error fetching location suggestions:', err);
+      if (type === 'restaurant') setRestaurantSuggestions([]);
+      else setLocationSuggestions([]);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  // Fetch restaurant suggestions when user types
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (restaurantQuery.trim().length >= 2) {
+        fetchLocationSuggestions(restaurantQuery, 'restaurant');
+      } else {
+        setRestaurantSuggestions([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [restaurantQuery]);
+
+  // Fetch location suggestions when user types
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (locationQuery.trim().length >= 2) {
+        fetchLocationSuggestions(locationQuery, 'location');
+      } else {
+        setLocationSuggestions([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [locationQuery]);
+
+  // Fetch initial food orders on component mount
+  useEffect(() => {
+    const fetchInitialOrders = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Search for popular restaurants to show initial orders
+        const popularRestaurants = ["Pizza", "Burger", "Sushi", "Thai"];
+        const fetchedOrders: FoodOrder[] = [];
+
+        for (const restaurant of popularRestaurants) {
+          try {
+            const result = await searchFoodOrders({
+              restaurant,
+              includeExpired: false,
+            });
+            fetchedOrders.push(...result);
+          } catch (err) {
+            console.log(`No orders found for ${restaurant}`);
+          }
+        }
+
+        // Remove duplicates based on _id
+        const uniqueOrders = Array.from(
+          new Map(fetchedOrders.map((order) => [order._id, order])).values()
+        );
+
+        setAllFoodOrders(uniqueOrders.slice(0, 12));
+      } catch (err: any) {
+        console.error("Error fetching initial orders:", err);
+        setAllFoodOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialOrders();
+  }, []);
+
+  // Smart search: Fetch orders based on queries
+  useEffect(() => {
+    const fetchOrdersByQuery = async () => {
+      const trimmedRestaurant = restaurantQuery.trim();
+      const trimmedLocation = locationQuery.trim();
+      
+      if (!trimmedRestaurant && !trimmedLocation) {
+        setHasSearched(false);
+        return;
+      }
+
+      if ((trimmedRestaurant && trimmedRestaurant.length < 2) || 
+          (trimmedLocation && trimmedLocation.length < 2)) {
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      setHasSearched(true);
+
+      try {
+        const result = await searchFoodOrders({
+          restaurant: trimmedRestaurant || undefined,
+          location: trimmedLocation || undefined,
+          includeExpired: false,
+        });
+        setAllFoodOrders(result);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch food orders");
+        setAllFoodOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      fetchOrdersByQuery();
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [restaurantQuery, locationQuery]);
+
+  // Calculate split cost per person
+  const calculateSplitCost = (totalPrice: number, currentParticipants: number) => {
+    return (totalPrice / currentParticipants).toFixed(2);
+  };
+
+  // Format date/time
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
 
   return (
     <div className="min-h-screen w-full overflow-hidden relative flex flex-col">
@@ -150,13 +271,29 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
               Back to Dashboard
             </Button>
             
-            <div className="flex items-center gap-4 mb-2">
-              <div className={`p-3 rounded-2xl bg-gradient-to-br from-[#F4B400] to-[#FFD166]`}>
-                <UtensilsCrossed className="w-8 h-8 text-white" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-2xl bg-gradient-to-br from-[#F4B400] to-[#FFD166]`}>
+                  <UtensilsCrossed className="w-8 h-8 text-white" />
+                </div>
+                <h1 className={`text-4xl md:text-5xl ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                  Find Food Orders
+                </h1>
               </div>
-              <h1 className={`text-4xl md:text-5xl ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
-                Find Food Orders
-              </h1>
+              
+              {onNavigateToCreateFood && (
+                <Button
+                  onClick={onNavigateToCreateFood}
+                  className={`px-6 py-3 rounded-xl ${
+                    isDark 
+                      ? 'bg-gradient-to-r from-[#F4B400] to-[#FFD166] hover:from-[#FFD166] hover:to-[#F4B400] text-[#020402]' 
+                      : 'bg-gradient-to-r from-[#F4B400] to-[#FF7F50] text-white hover:from-[#FF7F50] hover:to-[#F4B400]'
+                  } shadow-lg hover:shadow-xl transition-all flex items-center gap-2`}
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="hidden md:inline">Create Order</span>
+                </Button>
+              )}
             </div>
             <p className={`${isDark ? 'text-[#758173]' : 'text-[#020402]/70'} text-lg`}>
               Join existing food orders or create your own
@@ -174,32 +311,124 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
                 : 'bg-white/30 border-white/60'
             } border shadow-lg`}
           >
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${isDark ? 'text-[#758173]' : 'text-[#020402]/50'}`} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* Restaurant Search */}
+              <motion.div className="relative" whileHover={{ scale: 1.02 }}>
+                <UtensilsCrossed className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 z-10 ${isDark ? 'text-[#F4B400]' : 'text-[#FF7F50]'}`} />
                 <Input
                   type="text"
-                  placeholder="Search by restaurant, cuisine, or destination..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`pl-12 h-12 rounded-xl ${
-                    isDark 
-                      ? 'bg-[#020402]/50 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]' 
-                      : 'bg-white/50 border-white text-[#020402] placeholder:text-[#020402]/50'
-                  }`}
+                  placeholder="Enter restaurant name..."
+                  value={restaurantQuery}
+                  onChange={(e) => setRestaurantQuery(e.target.value)}
+                  onFocus={() => setShowRestaurantSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowRestaurantSuggestions(false), 200)}
+                  className={`pl-12 h-12 rounded-xl ${isDark ? 'bg-[#020402]/50 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]' : 'bg-white/50 border-white text-[#020402] placeholder:text-[#020402]/50'}`}
                 />
-              </div>
-              <Button
-                className={`h-12 px-6 rounded-xl ${
-                  isDark 
-                    ? 'bg-[#3A463A] hover:bg-[#3A463A]/80 text-[#C5EFCB]' 
-                    : 'bg-white/60 hover:bg-white/80 text-[#020402]'
-                }`}
-              >
-                <Filter className="w-5 h-5 mr-2" />
-                Filters
-              </Button>
+                {/* Restaurant Suggestions */}
+                {showRestaurantSuggestions && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`absolute top-full left-0 right-0 mt-2 rounded-xl backdrop-blur-lg z-20 max-h-60 overflow-y-auto ${
+                      isDark ? "bg-[#1A1F1A] border-[#3A463A]" : "bg-white border-gray-300"
+                    } border-2 shadow-xl`}
+                  >
+                    {loadingSuggestions && restaurantQuery.length >= 2 ? (
+                      <div className="px-4 py-3 flex items-center gap-2">
+                        <Loader2 className={`w-4 h-4 animate-spin ${isDark ? "text-[#F4B400]" : "text-[#FF7F50]"}`} />
+                        <span className={isDark ? "text-[#758173]" : "text-[#020402]/70"}>
+                          Searching restaurants...
+                        </span>
+                      </div>
+                    ) : restaurantSuggestions.length > 0 ? (
+                      restaurantSuggestions.map((location, idx) => (
+                        <motion.button
+                          key={idx}
+                          whileHover={{ backgroundColor: isDark ? "rgba(244, 180, 0, 0.1)" : "rgba(255, 127, 80, 0.05)" }}
+                          onClick={() => {
+                            setRestaurantQuery(location);
+                            setShowRestaurantSuggestions(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 flex items-center gap-3 ${isDark ? "text-[#C5EFCB] hover:text-[#F4B400]" : "text-[#020402] hover:text-[#FF7F50]"} transition-colors`}
+                        >
+                          <UtensilsCrossed className="w-4 h-4 shrink-0" />
+                          <span>{location}</span>
+                        </motion.button>
+                      ))
+                    ) : restaurantQuery.length >= 2 ? (
+                      <div className="px-4 py-3">
+                        <span className={isDark ? "text-[#758173]" : "text-[#020402]/70"}>
+                          No restaurants found
+                        </span>
+                      </div>
+                    ) : null}
+                  </motion.div>
+                )}
+              </motion.div>
+
+              {/* Location Search */}
+              <motion.div className="relative" whileHover={{ scale: 1.02 }}>
+                <MapPin className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 z-10 ${isDark ? 'text-[#FFD166]' : 'text-[#F4B400]'}`} />
+                <Input
+                  type="text"
+                  placeholder="Enter delivery location..."
+                  value={locationQuery}
+                  onChange={(e) => setLocationQuery(e.target.value)}
+                  onFocus={() => setShowLocationSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 200)}
+                  className={`pl-12 h-12 rounded-xl ${isDark ? 'bg-[#020402]/50 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]' : 'bg-white/50 border-white text-[#020402] placeholder:text-[#020402]/50'}`}
+                />
+                {/* Location Suggestions */}
+                {showLocationSuggestions && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`absolute top-full left-0 right-0 mt-2 rounded-xl backdrop-blur-sm z-20 max-h-60 overflow-y-auto ${
+                      isDark ? "bg-[#1A1F1A] border-[#3A463A]" : "bg-white border-gray-300"
+                    } border-2 shadow-xl`}
+                  >
+                    {loadingSuggestions && locationQuery.length >= 2 ? (
+                      <div className="px-4 py-3 flex items-center gap-2">
+                        <Loader2 className={`w-4 h-4 animate-spin ${isDark ? "text-[#FFD166]" : "text-[#F4B400]"}`} />
+                        <span className={isDark ? "text-[#758173]" : "text-[#020402]/70"}>
+                          Searching locations...
+                        </span>
+                      </div>
+                    ) : locationSuggestions.length > 0 ? (
+                      locationSuggestions.map((location, idx) => (
+                        <motion.button
+                          key={idx}
+                          whileHover={{ backgroundColor: isDark ? "rgba(255, 209, 102, 0.1)" : "rgba(244, 180, 0, 0.05)" }}
+                          onClick={() => {
+                            setLocationQuery(location);
+                            setShowLocationSuggestions(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 flex items-center gap-3 ${isDark ? "text-[#C5EFCB] hover:text-[#FFD166]" : "text-[#020402] hover:text-[#F4B400]"} transition-colors`}
+                        >
+                          <MapPin className="w-4 h-4 shrink-0" />
+                          <span>{location}</span>
+                        </motion.button>
+                      ))
+                    ) : locationQuery.length >= 2 ? (
+                      <div className="px-4 py-3">
+                        <span className={isDark ? "text-[#758173]" : "text-[#020402]/70"}>
+                          No locations found
+                        </span>
+                      </div>
+                    ) : null}
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
+
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <Button
+                className={`w-full h-12 rounded-xl ${isDark ? 'bg-gradient-to-r from-[#F4B400] to-[#FFD166] hover:from-[#FFD166] hover:to-[#F4B400] text-white' : 'bg-gradient-to-r from-[#F4B400] to-[#FF7F50] text-white'}`}
+              >
+                <Search className="w-5 h-5 mr-2" />
+                Search Orders
+              </Button>
+            </motion.div>
           </motion.div>
 
           {/* Results */}
@@ -209,16 +438,62 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mb-6"
           >
-            <p className={`${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-              {filteredOrders.length} available food orders
-            </p>
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className={`w-5 h-5 animate-spin ${isDark ? 'text-[#F4B400]' : 'text-[#FF7F50]'}`} />
+                <p className={`${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                  {restaurantQuery && locationQuery
+                    ? `Searching for "${restaurantQuery}" at "${locationQuery}"...`
+                    : restaurantQuery
+                    ? `Finding orders from "${restaurantQuery}"...`
+                    : locationQuery
+                    ? `Searching orders to "${locationQuery}"...`
+                    : "Loading available orders..."}
+                </p>
+              </div>
+            ) : error ? (
+              <div className="flex items-center gap-2 text-red-500">
+                <AlertCircle className="w-5 h-5" />
+                <p>{error}</p>
+              </div>
+            ) : (
+              <p className={`${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                {hasSearched || restaurantQuery || locationQuery ? (
+                  <>
+                    {allFoodOrders.length > 0 ? (
+                      <>
+                        Found <span className={`font-semibold ${isDark ? 'text-[#FFD166]' : 'text-[#F4B400]'}`}>
+                          {allFoodOrders.length}
+                        </span> {allFoodOrders.length === 1 ? "order" : "orders"}
+                      </>
+                    ) : (
+                      <>
+                        No orders found. Try different search terms or{" "}
+                        <button
+                          onClick={onNavigateToCreateFood}
+                          className={`underline ${isDark ? "text-[#FFD166] hover:text-[#F4B400]" : "text-[#F4B400] hover:text-[#FF7F50]"} transition-colors`}
+                        >
+                          create a new order
+                        </button>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {allFoodOrders.length > 0
+                      ? `Showing ${allFoodOrders.length} available order${allFoodOrders.length > 1 ? "s" : ""}. Search to find specific restaurants or locations.`
+                      : "No orders available. Be the first to create one!"}
+                  </>
+                )}
+              </p>
+            )}
           </motion.div>
 
           {/* Food Orders Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredOrders.map((order, index) => (
+            {allFoodOrders.map((order, index) => (
               <motion.div
-                key={order.id}
+                key={order._id}
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ 
@@ -232,6 +507,7 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
                   scale: 1.02,
                   transition: { duration: 0.3 }
                 }}
+                onClick={() => onNavigateToDetail(order._id)}
                 className={`rounded-2xl backdrop-blur-xl ${
                   isDark 
                     ? 'bg-[#1A1F1A]/60 border-[#3A463A]/50' 
@@ -250,32 +526,52 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
                   transition={{ duration: 0.3 }}
                 />
                 
-                {/* Image */}
+                {/* Restaurant Icon Header */}
                 <div className="relative h-48 overflow-hidden">
-                  <motion.div
-                    whileHover={{ scale: 1.15, rotate: 2 }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                  >
-                    <ImageWithFallback
-                      src={order.image}
-                      alt={order.restaurant}
-                      className="w-full h-full object-cover"
-                    />
-                  </motion.div>
+                  <div className={`w-full h-full flex items-center justify-center ${
+                    isDark 
+                      ? 'bg-gradient-to-br from-[#2A3A2A] to-[#1A2A1A]' 
+                      : 'bg-gradient-to-br from-[#A9C5A0] to-[#C5EFCB]'
+                  }`}>
+                    <UtensilsCrossed className={`w-20 h-20 ${
+                      isDark ? 'text-[#A9C5A0]' : 'text-[#2A5A2A]'
+                    }`} />
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   
+                  {/* Offer Badge */}
+                  {order.Offer && order.Offer.length > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + index * 0.1 }}
+                      whileHover={{ scale: 1.1 }}
+                      className="absolute top-4 left-4"
+                    >
+                      <Badge className="bg-[#F4B400] text-white px-3 py-1 text-sm font-semibold shadow-lg">
+                        <Star className="w-4 h-4 mr-1 inline" />
+                        {order.Offer[0].isPercentage 
+                          ? `${order.Offer[0].amount}% OFF` 
+                          : `$${order.Offer[0].amount} OFF`
+                        }
+                      </Badge>
+                    </motion.div>
+                  )}
+                  
                   {/* Spots Available Badge */}
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                    whileHover={{ scale: 1.1 }}
+                  {order.maxParticipants && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 + index * 0.1 }}
+                      whileHover={{ scale: 1.1 }}
                     className={`absolute top-3 right-3 px-3 py-1 rounded-full backdrop-blur-md ${
                       isDark ? 'bg-[#F4B400]/90' : 'bg-[#F4B400]'
                     } text-white text-sm shadow-lg`}
                   >
-                    {order.maxMembers - order.currentMembers} spots left
+                    {order.maxParticipants - order.currentParticipants} spots left
                   </motion.div>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -288,7 +584,7 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
                       <Badge variant="secondary" className={`${
                         isDark ? 'bg-[#3A463A] text-[#C5EFCB]' : 'bg-white/50 text-[#020402]'
                       }`}>
-                        {order.cuisine}
+                        {order.cuisine || 'Various'}
                       </Badge>
                     </div>
                     <motion.div 
@@ -298,7 +594,7 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
                     >
                       <Star className="w-4 h-4 fill-[#F4B400] text-[#F4B400]" />
                       <span className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                        {order.rating}
+                        Min ₹{order.MinSpent}
                       </span>
                     </motion.div>
                   </div>
@@ -307,35 +603,37 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
                     <div className="flex items-center gap-2">
                       <MapPin className={`w-4 h-4 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`} />
                       <span className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                        {order.destination}
+                        {order.deliveryLocation || 'To be decided'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className={`w-4 h-4 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`} />
                       <span className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                        Delivery: {order.deliveryTime}
+                        Order by: {formatDateTime(order.expiryTime)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Users className={`w-4 h-4 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`} />
-                      <span className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                        {order.currentMembers}/{order.maxMembers} members
-                      </span>
-                    </div>
+                    {order.maxParticipants && (
+                      <div className="flex items-center gap-2">
+                        <Users className={`w-4 h-4 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`} />
+                        <span className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                          {order.currentParticipants}/{order.maxParticipants} members
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-opacity-20" style={{
-                    borderColor: isDark ? '#3A463A' : '#020402'
-                  }}>
+                  <div className={`flex items-center justify-between pt-4 border-t ${
+                    isDark ? 'border-[#3A463A]/20' : 'border-[#020402]/20'
+                  }`}>
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'} line-through`}>
-                        {order.originalCost}
+                      <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                        Total: ₹{order.totalPrice}
                       </p>
                       <p className={`text-2xl ${isDark ? 'text-[#F4B400]' : 'text-[#FF7F50]'}`}>
-                        {order.estimatedCost}
+                        ₹{calculateSplitCost(order.totalPrice, order.currentParticipants)}/person
                       </p>
                     </motion.div>
                     <motion.div
@@ -344,21 +642,26 @@ export function FoodSearch({ isDark, toggleTheme, onNavigateBack, onNavigateToDe
                       transition={{ duration: 0.2 }}
                     >
                       <Button
-                        onClick={onNavigateToDetail}
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          onNavigateToDetail(order._id);
+                        }}
                         className={`rounded-full shadow-md ${
                           isDark 
                             ? 'bg-gradient-to-r from-[#F4B400] to-[#FFD166] hover:from-[#FFD166] hover:to-[#F4B400] text-[#020402]' 
                             : 'bg-gradient-to-r from-[#F4B400] to-[#FF7F50] text-white'
                         }`}
                       >
-                        Join Order
+                        View Details
                       </Button>
                     </motion.div>
                   </div>
 
-                  <p className={`text-xs mt-3 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                    Organized by {order.organizer}
-                  </p>
+                  {order.createdBy && (
+                    <p className={`text-xs mt-3 ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                      Organized by {order.createdBy.name}
+                    </p>
+                  )}
                 </div>
               </motion.div>
             ))}

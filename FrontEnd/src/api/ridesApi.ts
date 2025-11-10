@@ -77,7 +77,8 @@ export const createRide = async (
     );
     return response.data.data;
   } catch (error: any) {
-    const errorMessage = error.response?.data?.message || "Failed to create ride";
+    const errorMessage =
+      error.response?.data?.message || "Failed to create ride";
     throw new Error(errorMessage);
   }
 };
@@ -93,7 +94,8 @@ export const searchRides = async (
     );
     return response.data.data.rides;
   } catch (error: any) {
-    const errorMessage = error.response?.data?.message || "Failed to search rides";
+    const errorMessage =
+      error.response?.data?.message || "Failed to search rides";
     throw new Error(errorMessage);
   }
 };
@@ -108,20 +110,25 @@ export const getRideDetails = async (
     );
     return response.data.data;
   } catch (error: any) {
-    const errorMessage = error.response?.data?.message || "Failed to get ride details";
+    const errorMessage =
+      error.response?.data?.message || "Failed to get ride details";
     throw new Error(errorMessage);
   }
 };
 
 // Get user's rides (created and joined)
-export const getUserRides = async (): Promise<{ created: Ride[]; joined: Ride[] }> => {
+export const getUserRides = async (): Promise<{
+  created: Ride[];
+  joined: Ride[];
+}> => {
   try {
-    const response = await privateAxios.get<{ data: { created: Ride[]; joined: Ride[] } }>(
-      "/api/v1/rides/my-rides"
-    );
+    const response = await privateAxios.get<{
+      data: { created: Ride[]; joined: Ride[] };
+    }>("/api/v1/rides/my-rides");
     return response.data.data;
   } catch (error: any) {
-    const errorMessage = error.response?.data?.message || "Failed to get user rides";
+    const errorMessage =
+      error.response?.data?.message || "Failed to get user rides";
     throw new Error(errorMessage);
   }
 };
@@ -147,7 +154,8 @@ export const leaveRide = async (rideId: string): Promise<RideResponse> => {
     );
     return response.data.data;
   } catch (error: any) {
-    const errorMessage = error.response?.data?.message || "Failed to leave ride";
+    const errorMessage =
+      error.response?.data?.message || "Failed to leave ride";
     throw new Error(errorMessage);
   }
 };
@@ -157,7 +165,8 @@ export const deleteRide = async (rideId: string): Promise<void> => {
   try {
     await privateAxios.delete(`/api/v1/rides/${rideId}`);
   } catch (error: any) {
-    const errorMessage = error.response?.data?.message || "Failed to delete ride";
+    const errorMessage =
+      error.response?.data?.message || "Failed to delete ride";
     throw new Error(errorMessage);
   }
 };
