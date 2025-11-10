@@ -13,7 +13,7 @@ export function cspPlugin(): Plugin {
         "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: https: blob:",
         "font-src 'self' data:",
-        "connect-src 'self' http://localhost:8000 ws://localhost:5173", // Add WebSocket for HMR
+        "connect-src 'self' http://localhost:8000 https://codeblooded-9jnh.onrender.com ws://localhost:5173", // Add production backend for dev testing
         "media-src 'self'",
         "object-src 'none'",
         "base-uri 'self'",
