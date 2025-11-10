@@ -144,7 +144,7 @@ export function Login({ onNavigateBack, isDark, toggleTheme }: LoginProps) {
                     isDark ? "text-[#C5EFCB]" : "text-[#020402]"
                   }`}
                 >
-                  Riden'Byte
+                  Login
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0 }}

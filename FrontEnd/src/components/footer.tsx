@@ -51,7 +51,11 @@ export function Footer({ isDark, onNavigate }: FooterProps) {
 		{ icon: Twitter, label: "Twitter", url: "#" },
 		{ icon: Instagram, label: "Instagram", url: "#" },
 		{ icon: Linkedin, label: "LinkedIn", url: "#" },
-		{ icon: Github, label: "GitHub", url: "#" },
+		{
+			icon: Github,
+			label: "GitHub",
+			url: "https://github.com/Vivek8749/CodeBlooded",
+		},
 	];
 
 	return (
@@ -202,7 +206,7 @@ export function Footer({ isDark, onNavigate }: FooterProps) {
 														: "text-[#020402]/70"
 												}`}
 											>
-												NIT Jamshedpur, Jamshedpur
+												Underground Lab, NIT Jamshedpur
 											</span>
 										</div>
 									</div>
@@ -234,20 +238,35 @@ export function Footer({ isDark, onNavigate }: FooterProps) {
 										<ul className="space-y-3">
 											{links.map((link) => (
 												<li key={link.value}>
-													<button
-														onClick={() =>
-															onNavigate?.(
-																link.value
-															)
-														}
-														className={`${
-															isDark
-																? "text-[#758173] hover:text-[#F4B400]"
-																: "text-[#020402]/70 hover:text-[#FF7F50]"
-														} transition-colors duration-300 text-left`}
-													>
-														{link.label}
-													</button>
+													{link.value === "about" ? (
+														<a
+															href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+															target="_blank"
+															rel="noopener noreferrer"
+															className={`${
+																isDark
+																	? "text-[#758173] hover:text-[#F4B400]"
+																	: "text-[#020402]/70 hover:text-[#FF7F50]"
+															} transition-colors duration-300 text-left`}
+														>
+															{link.label}
+														</a>
+													) : (
+														<button
+															onClick={() =>
+																onNavigate?.(
+																	link.value
+																)
+															}
+															className={`${
+																isDark
+																	? "text-[#758173] hover:text-[#F4B400]"
+																	: "text-[#020402]/70 hover:text-[#FF7F50]"
+															} transition-colors duration-300 text-left`}
+														>
+															{link.label}
+														</button>
+													)}
 												</li>
 											))}
 										</ul>

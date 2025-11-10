@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { 
+import {
   ArrowLeft,
   MapPin,
   Clock,
@@ -11,8 +11,10 @@ import {
   Trash2,
   ShoppingBag,
   Package,
-  User,
-  Phone
+  Users,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
@@ -26,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { createFoodOrder, type CreateFoodOrderData } from "../api/foodApi";
 
 interface CreateFoodOrderProps {
   isDark: boolean;
@@ -44,9 +47,9 @@ interface FoodItem {
 }
 
 const restaurants = [
-  { 
-    value: "pizza-palace", 
-    label: "Pizza Palace", 
+  {
+    value: "pizza-palace",
+    label: "Pizza Palace",
     icon: "🍕",
     cuisine: "Italian",
     menu: [
@@ -56,11 +59,11 @@ const restaurants = [
       { name: "Veggie Supreme", price: 15.99 },
       { name: "Garlic Bread", price: 5.99 },
       { name: "Caesar Salad", price: 7.99 },
-    ]
+    ],
   },
-  { 
-    value: "burger-barn", 
-    label: "Burger Barn", 
+  {
+    value: "burger-barn",
+    label: "Burger Barn",
     icon: "🍔",
     cuisine: "American",
     menu: [
@@ -70,11 +73,11 @@ const restaurants = [
       { name: "Veggie Burger", price: 9.99 },
       { name: "Fries", price: 4.99 },
       { name: "Onion Rings", price: 5.99 },
-    ]
+    ],
   },
-  { 
-    value: "sushi-spot", 
-    label: "Sushi Spot", 
+  {
+    value: "sushi-spot",
+    label: "Sushi Spot",
     icon: "🍱",
     cuisine: "Japanese",
     menu: [
@@ -84,11 +87,11 @@ const restaurants = [
       { name: "Vegetable Tempura", price: 8.99 },
       { name: "Miso Soup", price: 4.99 },
       { name: "Edamame", price: 5.99 },
-    ]
+    ],
   },
-  { 
-    value: "taco-town", 
-    label: "Taco Town", 
+  {
+    value: "taco-town",
+    label: "Taco Town",
     icon: "🌮",
     cuisine: "Mexican",
     menu: [
@@ -98,11 +101,11 @@ const restaurants = [
       { name: "Nachos Supreme", price: 10.99 },
       { name: "Guacamole & Chips", price: 6.99 },
       { name: "Churros", price: 5.99 },
-    ]
+    ],
   },
-  { 
-    value: "noodle-house", 
-    label: "Noodle House", 
+  {
+    value: "noodle-house",
+    label: "Noodle House",
     icon: "🍜",
     cuisine: "Asian",
     menu: [
@@ -112,17 +115,24 @@ const restaurants = [
       { name: "Spring Rolls (6)", price: 7.99 },
       { name: "Fried Rice", price: 9.99 },
       { name: "Dumplings (8)", price: 8.99 },
-    ]
+    ],
   },
 ];
 
-export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigateToDashboard, onNavigateToRideSearch, onNavigateToFoodSearch }: CreateFoodOrderProps) {
+export function CreateFoodOrder({
+  isDark,
+  toggleTheme,
+  onNavigateBack,
+  onNavigateToDashboard,
+  onNavigateToRideSearch,
+  onNavigateToFoodSearch,
+}: CreateFoodOrderProps) {
   const handleNavigate = (page: string) => {
-    if (page === 'dashboard') {
+    if (page === "dashboard") {
       onNavigateToDashboard?.();
-    } else if (page === 'rides') {
+    } else if (page === "rides") {
       onNavigateToRideSearch?.();
-    } else if (page === 'food') {
+    } else if (page === "food") {
       onNavigateToFoodSearch?.();
     }
   };
@@ -130,42 +140,55 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
   const [restaurant, setRestaurant] = useState("");
   const [deliveryLocation, setDeliveryLocation] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
-  const [deliveryTime, setDeliveryTime] = useState("");
-  const [organizerName, setOrganizerName] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("12:00");
   const [items, setItems] = useState<FoodItem[]>([
-    { id: 1, name: "", quantity: 1, price: 0 }
+    { id: 1, name: "", quantity: 1, price: 0 },
   ]);
   const [totalCost, setTotalCost] = useState(0);
+  const [minSpent, setMinSpent] = useState(0);
+  const [offerType, setOfferType] = useState<"percentage" | "flat">(
+    "percentage"
+  );
+  const [offerAmount, setOfferAmount] = useState(0);
+  const [maxParticipants, setMaxParticipants] = useState<number | undefined>();
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
-  const selectedRestaurant = restaurants.find(r => r.value === restaurant);
+  const selectedRestaurant = restaurants.find((r) => r.value === restaurant);
 
   // Calculate total cost when items change
   useEffect(() => {
-    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
     setTotalCost(total);
   }, [items]);
 
   const addItem = () => {
-    const newId = Math.max(...items.map(i => i.id), 0) + 1;
+    const newId = Math.max(...items.map((i) => i.id), 0) + 1;
     setItems([...items, { id: newId, name: "", quantity: 1, price: 0 }]);
   };
 
   const removeItem = (id: number) => {
     if (items.length > 1) {
-      setItems(items.filter(item => item.id !== id));
+      setItems(items.filter((item) => item.id !== id));
     }
   };
 
   const updateItem = (id: number, field: keyof FoodItem, value: any) => {
-    setItems(items.map(item => 
-      item.id === id ? { ...item, [field]: value } : item
-    ));
+    setItems(
+      items.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
   };
 
   const updateItemFromMenu = (id: number, menuItemName: string) => {
     if (selectedRestaurant) {
-      const menuItem = selectedRestaurant.menu.find(m => m.name === menuItemName);
+      const menuItem = selectedRestaurant.menu.find(
+        (m) => m.name === menuItemName
+      );
       if (menuItem) {
         updateItem(id, "name", menuItem.name);
         updateItem(id, "price", menuItem.price);
@@ -173,32 +196,87 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({
-      restaurant,
-      deliveryLocation,
-      deliveryDate,
-      deliveryTime,
-      organizerName,
-      contactNumber,
-      items,
-      totalCost
-    });
+    setLoading(true);
+    setError("");
+
+    try {
+      // Combine date and time to create expiryTime
+      const expiryDateTime = new Date(`${deliveryDate}T${deliveryTime}`);
+
+      // Prepare API data
+      const orderData: CreateFoodOrderData = {
+        restaurant: selectedRestaurant?.label || restaurant,
+        minSpent: minSpent,
+        totalPrice: totalCost,
+        expiryTime: expiryDateTime.toISOString(),
+        deliveryLocation,
+        cuisine: selectedRestaurant?.cuisine,
+        notes,
+        maxParticipants,
+        items: items
+          .filter((item) => item.name)
+          .map(({ name, quantity, price }) => ({
+            name,
+            quantity,
+            price,
+          })),
+      };
+
+      // Add offer if amount is provided
+      if (offerAmount > 0) {
+        orderData.offer = [
+          {
+            isPercentage: offerType === "percentage",
+            amount: offerAmount,
+          },
+        ];
+      }
+
+      const createdOrder = await createFoodOrder(orderData);
+      console.log("Food order created successfully:", createdOrder);
+
+      setSuccess(true);
+      setTimeout(() => {
+        onNavigateBack();
+      }, 2000);
+    } catch (err: any) {
+      console.error("Failed to create food order:", err);
+      setError(
+        err.response?.data?.message ||
+          "Failed to create food order. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen w-full overflow-hidden relative flex flex-col">
       {/* Header */}
-      <Header isDark={isDark} toggleTheme={toggleTheme} isAuthenticated={true} onNavigate={handleNavigate} />
-      
+      <Header
+        isDark={isDark}
+        toggleTheme={toggleTheme}
+        isAuthenticated={true}
+        onNavigate={handleNavigate}
+      />
+
       {/* Animated Background */}
       <div className="absolute inset-0 z-0">
-        <div className={`absolute inset-0 ${isDark ? 'bg-[#020402]' : 'bg-gradient-to-br from-[#A9C5A0] via-[#C5EFCB] to-[#FFD166]'}`} />
-        
+        <div
+          className={`absolute inset-0 ${
+            isDark
+              ? "bg-[#020402]"
+              : "bg-gradient-to-br from-[#A9C5A0] via-[#C5EFCB] to-[#FFD166]"
+          }`}
+        />
+
         {/* Floating Orbs */}
         <motion.div
-          className={`absolute top-20 left-10 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-[#F4B400]/10' : 'bg-[#F4B400]/30'}`}
+          className={`absolute top-20 left-10 w-96 h-96 rounded-full blur-3xl ${
+            isDark ? "bg-[#F4B400]/10" : "bg-[#F4B400]/30"
+          }`}
           animate={{
             y: [0, 50, 0],
             x: [0, 30, 0],
@@ -210,7 +288,9 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
           }}
         />
         <motion.div
-          className={`absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-[#FF7F50]/10' : 'bg-[#FF7F50]/30'}`}
+          className={`absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl ${
+            isDark ? "bg-[#FF7F50]/10" : "bg-[#FF7F50]/30"
+          }`}
           animate={{
             y: [0, -40, 0],
             x: [0, -25, 0],
@@ -232,9 +312,9 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
             animate={{ opacity: 1, x: 0 }}
             onClick={onNavigateBack}
             className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-xl backdrop-blur-xl ${
-              isDark 
-                ? 'bg-[#1A1F1A]/60 border-[#3A463A]/50 text-[#C5EFCB] hover:bg-[#1A1F1A]/80' 
-                : 'bg-white/30 border-white/60 text-[#020402] hover:bg-white/50'
+              isDark
+                ? "bg-[#1A1F1A]/60 border-[#3A463A]/50 text-[#C5EFCB] hover:bg-[#1A1F1A]/80"
+                : "bg-white/30 border-white/60 text-[#020402] hover:bg-white/50"
             } border transition-all`}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -248,10 +328,18 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h1 className={`text-4xl md:text-5xl mb-4 ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+            <h1
+              className={`text-4xl md:text-5xl mb-4 ${
+                isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+              }`}
+            >
               Create New Food Order
             </h1>
-            <p className={`text-xl ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+            <p
+              className={`text-xl ${
+                isDark ? "text-[#758173]" : "text-[#020402]/70"
+              }`}
+            >
               Order together and split delivery costs with other students
             </p>
           </motion.div>
@@ -264,16 +352,20 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className={`rounded-3xl backdrop-blur-xl p-8 ${
-                isDark 
-                  ? 'bg-[#1A1F1A]/60 border-[#3A463A]/50' 
-                  : 'bg-white/30 border-white/60'
+                isDark
+                  ? "bg-[#1A1F1A]/60 border-[#3A463A]/50"
+                  : "bg-white/30 border-white/60"
               } border shadow-2xl`}
             >
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-3 rounded-xl bg-gradient-to-br from-[#F4B400] to-[#FFD166]">
                   <UtensilsCrossed className="w-6 h-6 text-white" />
                 </div>
-                <h2 className={`text-2xl ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                <h2
+                  className={`text-2xl ${
+                    isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                  }`}
+                >
                   Order Details
                 </h2>
               </div>
@@ -281,31 +373,54 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Restaurant */}
                 <div className="space-y-2">
-                  <Label htmlFor="restaurant" className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
+                  <Label
+                    htmlFor="restaurant"
+                    className={isDark ? "text-[#C5EFCB]" : "text-[#020402]"}
+                  >
                     <div className="flex items-center gap-2">
                       <UtensilsCrossed className="w-4 h-4 text-[#F4B400]" />
                       Restaurant
                     </div>
                   </Label>
-                  <Select value={restaurant} onValueChange={setRestaurant} required>
-                    <SelectTrigger className={`${
-                      isDark 
-                        ? 'bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB]' 
-                        : 'bg-white/50 border-white/60 text-[#020402]'
-                    } backdrop-blur-sm`}>
+                  <Select
+                    value={restaurant}
+                    onValueChange={setRestaurant}
+                    required
+                  >
+                    <SelectTrigger
+                      className={`${
+                        isDark
+                          ? "bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB]"
+                          : "bg-white/50 border-white/60 text-[#020402]"
+                      } backdrop-blur-sm`}
+                    >
                       <SelectValue placeholder="Select restaurant" />
                     </SelectTrigger>
-                    <SelectContent className={isDark ? 'bg-[#1A1F1A] border-[#3A463A]' : 'bg-white border-gray-200'}>
+                    <SelectContent
+                      className={
+                        isDark
+                          ? "bg-[#1A1F1A] border-[#3A463A]"
+                          : "bg-white border-gray-200"
+                      }
+                    >
                       {restaurants.map((rest) => (
-                        <SelectItem 
-                          key={rest.value} 
+                        <SelectItem
+                          key={rest.value}
                           value={rest.value}
-                          className={isDark ? 'text-[#C5EFCB] focus:bg-[#3A463A] focus:text-[#C5EFCB]' : 'text-[#020402]'}
+                          className={
+                            isDark
+                              ? "text-[#C5EFCB] focus:bg-[#3A463A] focus:text-[#C5EFCB]"
+                              : "text-[#020402]"
+                          }
                         >
                           <div className="flex items-center gap-2">
                             <span>{rest.icon}</span>
                             <span>{rest.label}</span>
-                            <span className={`text-xs ${isDark ? 'text-[#758173]' : 'text-[#020402]/60'}`}>
+                            <span
+                              className={`text-xs ${
+                                isDark ? "text-[#758173]" : "text-[#020402]/60"
+                              }`}
+                            >
                               ({rest.cuisine})
                             </span>
                           </div>
@@ -315,9 +430,155 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                   </Select>
                 </div>
 
+                {/* Min Spent & Offer Section */}
+                <div
+                  className={`p-4 rounded-xl space-y-4 ${
+                    isDark
+                      ? "bg-[#F4B400]/10 border-[#F4B400]/30"
+                      : "bg-[#F4B400]/20 border-[#F4B400]/40"
+                  } border`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="w-4 h-4 text-[#F4B400]" />
+                    <Label
+                      className={isDark ? "text-[#C5EFCB]" : "text-[#020402]"}
+                    >
+                      Restaurant Offer Details
+                    </Label>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="min-spent"
+                        className={`text-xs ${
+                          isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                        }`}
+                      >
+                        Minimum Spend Required (₹)
+                      </Label>
+                      <Input
+                        id="min-spent"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="e.g., 1000"
+                        value={minSpent || ""}
+                        onChange={(e) =>
+                          setMinSpent(parseFloat(e.target.value) || 0)
+                        }
+                        className={`${
+                          isDark
+                            ? "bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]"
+                            : "bg-white/50 border-white/60 text-[#020402] placeholder:text-[#020402]/50"
+                        } backdrop-blur-sm`}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        className={`text-xs ${
+                          isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                        }`}
+                      >
+                        Offer Type
+                      </Label>
+                      <Select
+                        value={offerType}
+                        onValueChange={(value: "percentage" | "flat") =>
+                          setOfferType(value)
+                        }
+                      >
+                        <SelectTrigger
+                          className={`${
+                            isDark
+                              ? "bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB]"
+                              : "bg-white/50 border-white/60 text-[#020402]"
+                          } backdrop-blur-sm`}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent
+                          className={
+                            isDark
+                              ? "bg-[#1A1F1A] border-[#3A463A]"
+                              : "bg-white border-gray-200"
+                          }
+                        >
+                          <SelectItem
+                            value="percentage"
+                            className={
+                              isDark
+                                ? "text-[#C5EFCB] focus:bg-[#3A463A] focus:text-[#C5EFCB]"
+                                : "text-[#020402]"
+                            }
+                          >
+                            Percentage (%)
+                          </SelectItem>
+                          <SelectItem
+                            value="flat"
+                            className={
+                              isDark
+                                ? "text-[#C5EFCB] focus:bg-[#3A463A] focus:text-[#C5EFCB]"
+                                : "text-[#020402]"
+                            }
+                          >
+                            Flat Amount (₹)
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="offer-amount"
+                      className={`text-xs ${
+                        isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                      }`}
+                    >
+                      {offerType === "percentage"
+                        ? "Discount Percentage (%)"
+                        : "Discount Amount (₹)"}
+                    </Label>
+                    <Input
+                      id="offer-amount"
+                      type="number"
+                      min="0"
+                      step={offerType === "percentage" ? "1" : "0.01"}
+                      max={offerType === "percentage" ? "100" : undefined}
+                      placeholder={
+                        offerType === "percentage" ? "e.g., 10" : "e.g., 500"
+                      }
+                      value={offerAmount || ""}
+                      onChange={(e) =>
+                        setOfferAmount(parseFloat(e.target.value) || 0)
+                      }
+                      className={`${
+                        isDark
+                          ? "bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]"
+                          : "bg-white/50 border-white/60 text-[#020402] placeholder:text-[#020402]/50"
+                      } backdrop-blur-sm`}
+                    />
+                  </div>
+
+                  <div
+                    className={`text-xs ${
+                      isDark ? "text-[#758173]" : "text-[#020402]/70"
+                    } pt-2 border-t border-current/20`}
+                  >
+                    💡 Example: Min spend ₹1000 with 10% off = ₹100 discount
+                    when target is reached
+                  </div>
+                </div>
+
                 {/* Delivery Location */}
                 <div className="space-y-2">
-                  <Label htmlFor="delivery-location" className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
+                  <Label
+                    htmlFor="delivery-location"
+                    className={isDark ? "text-[#C5EFCB]" : "text-[#020402]"}
+                  >
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-[#FF7F50]" />
                       Delivery To
@@ -330,9 +591,9 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                     value={deliveryLocation}
                     onChange={(e) => setDeliveryLocation(e.target.value)}
                     className={`${
-                      isDark 
-                        ? 'bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]' 
-                        : 'bg-white/50 border-white/60 text-[#020402] placeholder:text-[#020402]/50'
+                      isDark
+                        ? "bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]"
+                        : "bg-white/50 border-white/60 text-[#020402] placeholder:text-[#020402]/50"
                     } backdrop-blur-sm`}
                     required
                   />
@@ -341,10 +602,13 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                 {/* Date and Time */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="date" className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
+                    <Label
+                      htmlFor="date"
+                      className={isDark ? "text-[#C5EFCB]" : "text-[#020402]"}
+                    >
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-[#F4B400]" />
-                        Delivery Date
+                        Order Deadline Date
                       </div>
                     </Label>
                     <Input
@@ -353,19 +617,22 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                       value={deliveryDate}
                       onChange={(e) => setDeliveryDate(e.target.value)}
                       className={`${
-                        isDark 
-                          ? 'bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB]' 
-                          : 'bg-white/50 border-white/60 text-[#020402]'
+                        isDark
+                          ? "bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB]"
+                          : "bg-white/50 border-white/60 text-[#020402]"
                       } backdrop-blur-sm`}
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="time" className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
+                    <Label
+                      htmlFor="time"
+                      className={isDark ? "text-[#C5EFCB]" : "text-[#020402]"}
+                    >
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-[#F4B400]" />
-                        Delivery Time
+                        Order Deadline Time
                       </div>
                     </Label>
                     <Input
@@ -373,66 +640,84 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                       type="time"
                       value={deliveryTime}
                       onChange={(e) => setDeliveryTime(e.target.value)}
-                      className={`${
-                        isDark 
-                          ? 'bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB]' 
-                          : 'bg-white/50 border-white/60 text-[#020402]'
+                      className={`h-10 ${
+                        isDark
+                          ? "bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB] [color-scheme:dark]"
+                          : "bg-white/50 border-white/60 text-[#020402] [color-scheme:light]"
                       } backdrop-blur-sm`}
                       required
                     />
+                    <p
+                      className={`text-xs ${
+                        isDark ? "text-[#758173]" : "text-[#020402]/60"
+                      }`}
+                    >
+                      Last time to join this order before it's placed
+                    </p>
                   </div>
                 </div>
 
-                {/* Organizer Name */}
+                {/* Max Participants */}
                 <div className="space-y-2">
-                  <Label htmlFor="organizer-name" className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
+                  <Label
+                    htmlFor="max-participants"
+                    className={isDark ? "text-[#C5EFCB]" : "text-[#020402]"}
+                  >
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-[#F4B400]" />
-                      Organizer Name
+                      <Users className="w-4 h-4 text-[#F4B400]" />
+                      Max Participants (Optional)
                     </div>
                   </Label>
                   <Input
-                    id="organizer-name"
-                    type="text"
-                    placeholder="e.g., John Doe"
-                    value={organizerName}
-                    onChange={(e) => setOrganizerName(e.target.value)}
+                    id="max-participants"
+                    type="number"
+                    min="2"
+                    placeholder="e.g., 5"
+                    value={maxParticipants || ""}
+                    onChange={(e) =>
+                      setMaxParticipants(
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
+                    }
                     className={`${
-                      isDark 
-                        ? 'bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]' 
-                        : 'bg-white/50 border-white/60 text-[#020402] placeholder:text-[#020402]/50'
+                      isDark
+                        ? "bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]"
+                        : "bg-white/50 border-white/60 text-[#020402] placeholder:text-[#020402]/50"
                     } backdrop-blur-sm`}
-                    required
                   />
                 </div>
 
-                {/* Contact Number */}
+                {/* Notes */}
                 <div className="space-y-2">
-                  <Label htmlFor="contact-number" className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
+                  <Label
+                    htmlFor="notes"
+                    className={isDark ? "text-[#C5EFCB]" : "text-[#020402]"}
+                  >
                     <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-[#F4B400]" />
-                      Contact Number
+                      <Package className="w-4 h-4 text-[#F4B400]" />
+                      Additional Notes (Optional)
                     </div>
                   </Label>
-                  <Input
-                    id="contact-number"
-                    type="tel"
-                    placeholder="e.g., +91 98765 43210"
-                    value={contactNumber}
-                    onChange={(e) => setContactNumber(e.target.value)}
-                    className={`${
-                      isDark 
-                        ? 'bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]' 
-                        : 'bg-white/50 border-white/60 text-[#020402] placeholder:text-[#020402]/50'
-                    } backdrop-blur-sm`}
-                    required
+                  <textarea
+                    id="notes"
+                    rows={3}
+                    placeholder="e.g., No onions, extra cheese, etc."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className={`w-full rounded-md px-3 py-2 ${
+                      isDark
+                        ? "bg-[#020402]/40 border-[#3A463A] text-[#C5EFCB] placeholder:text-[#758173]"
+                        : "bg-white/50 border-white/60 text-[#020402] placeholder:text-[#020402]/50"
+                    } backdrop-blur-sm border`}
                   />
                 </div>
 
                 {/* Items Section */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
+                    <Label
+                      className={isDark ? "text-[#C5EFCB]" : "text-[#020402]"}
+                    >
                       <div className="flex items-center gap-2">
                         <ShoppingBag className="w-4 h-4 text-[#F4B400]" />
                         Items
@@ -444,9 +729,9 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                       size="sm"
                       variant="outline"
                       className={`${
-                        isDark 
-                          ? 'bg-[#F4B400]/20 border-[#F4B400] text-[#C5EFCB] hover:bg-[#F4B400]/30' 
-                          : 'bg-[#F4B400]/20 border-[#F4B400] text-[#020402] hover:bg-[#F4B400]/30'
+                        isDark
+                          ? "bg-[#F4B400]/20 border-[#F4B400] text-[#C5EFCB] hover:bg-[#F4B400]/30"
+                          : "bg-[#F4B400]/20 border-[#F4B400] text-[#020402] hover:bg-[#F4B400]/30"
                       }`}
                     >
                       <Plus className="w-4 h-4 mr-1" />
@@ -463,13 +748,17 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         className={`p-4 rounded-xl ${
-                          isDark 
-                            ? 'bg-[#020402]/40 border-[#3A463A]' 
-                            : 'bg-white/50 border-white/60'
+                          isDark
+                            ? "bg-[#020402]/40 border-[#3A463A]"
+                            : "bg-white/50 border-white/60"
                         } border space-y-3`}
                       >
                         <div className="flex items-start justify-between">
-                          <span className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                          <span
+                            className={`text-sm ${
+                              isDark ? "text-[#758173]" : "text-[#020402]/70"
+                            }`}
+                          >
                             Item {index + 1}
                           </span>
                           {items.length > 1 && (
@@ -479,9 +768,9 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                               size="sm"
                               variant="ghost"
                               className={`h-6 w-6 p-0 ${
-                                isDark 
-                                  ? 'text-[#FF7F50] hover:bg-[#FF7F50]/20' 
-                                  : 'text-[#FF7F50] hover:bg-[#FF7F50]/20'
+                                isDark
+                                  ? "text-[#FF7F50] hover:bg-[#FF7F50]/20"
+                                  : "text-[#FF7F50] hover:bg-[#FF7F50]/20"
                               }`}
                             >
                               <Trash2 className="w-4 h-4" />
@@ -491,28 +780,47 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
 
                         {/* Item Name */}
                         <div className="space-y-1">
-                          <Label htmlFor={`item-name-${item.id}`} className={`text-xs ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                          <Label
+                            htmlFor={`item-name-${item.id}`}
+                            className={`text-xs ${
+                              isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                            }`}
+                          >
                             Food Item
                           </Label>
                           {restaurant ? (
-                            <Select 
-                              value={item.name} 
-                              onValueChange={(value) => updateItemFromMenu(item.id, value)}
+                            <Select
+                              value={item.name}
+                              onValueChange={(value: string) =>
+                                updateItemFromMenu(item.id, value)
+                              }
                               required
                             >
-                              <SelectTrigger className={`${
-                                isDark 
-                                  ? 'bg-[#1A1F1A]/40 border-[#3A463A] text-[#C5EFCB]' 
-                                  : 'bg-white/70 border-white/80 text-[#020402]'
-                              } h-9 text-sm`}>
+                              <SelectTrigger
+                                className={`${
+                                  isDark
+                                    ? "bg-[#1A1F1A]/40 border-[#3A463A] text-[#C5EFCB]"
+                                    : "bg-white/70 border-white/80 text-[#020402]"
+                                } h-9 text-sm`}
+                              >
                                 <SelectValue placeholder="Select item" />
                               </SelectTrigger>
-                              <SelectContent className={isDark ? 'bg-[#1A1F1A] border-[#3A463A]' : 'bg-white border-gray-200'}>
+                              <SelectContent
+                                className={
+                                  isDark
+                                    ? "bg-[#1A1F1A] border-[#3A463A]"
+                                    : "bg-white border-gray-200"
+                                }
+                              >
                                 {selectedRestaurant?.menu.map((menuItem) => (
-                                  <SelectItem 
-                                    key={menuItem.name} 
+                                  <SelectItem
+                                    key={menuItem.name}
                                     value={menuItem.name}
-                                    className={isDark ? 'text-[#C5EFCB] focus:bg-[#3A463A] focus:text-[#C5EFCB]' : 'text-[#020402]'}
+                                    className={
+                                      isDark
+                                        ? "text-[#C5EFCB] focus:bg-[#3A463A] focus:text-[#C5EFCB]"
+                                        : "text-[#020402]"
+                                    }
                                   >
                                     {menuItem.name} - ${menuItem.price}
                                   </SelectItem>
@@ -526,9 +834,9 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                               placeholder="Select a restaurant first"
                               disabled
                               className={`${
-                                isDark 
-                                  ? 'bg-[#1A1F1A]/40 border-[#3A463A] text-[#758173]' 
-                                  : 'bg-white/70 border-white/80 text-[#020402]/50'
+                                isDark
+                                  ? "bg-[#1A1F1A]/40 border-[#3A463A] text-[#758173]"
+                                  : "bg-white/70 border-white/80 text-[#020402]/50"
                               } h-9 text-sm`}
                             />
                           )}
@@ -537,7 +845,12 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                         {/* Quantity and Price */}
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <Label htmlFor={`item-qty-${item.id}`} className={`text-xs ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                            <Label
+                              htmlFor={`item-qty-${item.id}`}
+                              className={`text-xs ${
+                                isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                              }`}
+                            >
                               Quantity
                             </Label>
                             <Input
@@ -545,25 +858,37 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                               type="number"
                               min="1"
                               value={item.quantity}
-                              onChange={(e) => updateItem(item.id, "quantity", parseInt(e.target.value) || 1)}
+                              onChange={(e) =>
+                                updateItem(
+                                  item.id,
+                                  "quantity",
+                                  parseInt(e.target.value) || 1
+                                )
+                              }
                               className={`${
-                                isDark 
-                                  ? 'bg-[#1A1F1A]/40 border-[#3A463A] text-[#C5EFCB]' 
-                                  : 'bg-white/70 border-white/80 text-[#020402]'
+                                isDark
+                                  ? "bg-[#1A1F1A]/40 border-[#3A463A] text-[#C5EFCB]"
+                                  : "bg-white/70 border-white/80 text-[#020402]"
                               } h-9 text-sm`}
                               required
                             />
                           </div>
 
                           <div className="space-y-1">
-                            <Label className={`text-xs ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                            <Label
+                              className={`text-xs ${
+                                isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                              }`}
+                            >
                               Subtotal
                             </Label>
-                            <div className={`h-9 flex items-center px-3 rounded-md ${
-                              isDark 
-                                ? 'bg-[#1A1F1A]/40 border border-[#3A463A] text-[#F4B400]' 
-                                : 'bg-white/70 border border-white/80 text-[#FF7F50]'
-                            } text-sm`}>
+                            <div
+                              className={`h-9 flex items-center px-3 rounded-md ${
+                                isDark
+                                  ? "bg-[#1A1F1A]/40 border border-[#3A463A] text-[#F4B400]"
+                                  : "bg-white/70 border border-white/80 text-[#FF7F50]"
+                              } text-sm`}
+                            >
                               ${(item.price * item.quantity).toFixed(2)}
                             </div>
                           </div>
@@ -579,36 +904,97 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`p-4 rounded-xl ${
-                      isDark 
-                        ? 'bg-[#F4B400]/10 border-[#F4B400]/30' 
-                        : 'bg-[#F4B400]/20 border-[#F4B400]/40'
+                      isDark
+                        ? "bg-[#F4B400]/10 border-[#F4B400]/30"
+                        : "bg-[#F4B400]/20 border-[#F4B400]/40"
                     } border space-y-3`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <DollarSign className="w-5 h-5 text-[#F4B400]" />
-                        <span className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
+                        <span
+                          className={
+                            isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                          }
+                        >
                           Total Food Cost
                         </span>
                       </div>
-                      <span className={`text-xl ${isDark ? 'text-[#F4B400]' : 'text-[#FF7F50]'}`}>
+                      <span
+                        className={`text-xl ${
+                          isDark ? "text-[#F4B400]" : "text-[#FF7F50]"
+                        }`}
+                      >
                         ${totalCost.toFixed(2)}
                       </span>
                     </div>
 
-                    <div className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'} pt-2 border-t border-current/20`}>
+                    <div
+                      className={`text-sm ${
+                        isDark ? "text-[#758173]" : "text-[#020402]/70"
+                      } pt-2 border-t border-current/20`}
+                    >
                       💡 Delivery fee will be split among all participants
                     </div>
+                  </motion.div>
+                )}
+
+                {/* Error Message */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`p-4 rounded-xl ${
+                      isDark
+                        ? "bg-red-500/10 border-red-500/30 text-red-400"
+                        : "bg-red-50 border-red-200 text-red-600"
+                    } border flex items-center gap-3`}
+                  >
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <p className="text-sm">{error}</p>
+                  </motion.div>
+                )}
+
+                {/* Success Message */}
+                {success && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className={`p-4 rounded-xl ${
+                      isDark
+                        ? "bg-green-500/10 border-green-500/30 text-green-400"
+                        : "bg-green-50 border-green-200 text-green-600"
+                    } border flex items-center gap-3`}
+                  >
+                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                    <p className="text-sm">
+                      Food order created successfully! Redirecting...
+                    </p>
                   </motion.div>
                 )}
 
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  className={`w-full py-6 text-lg bg-gradient-to-r from-[#F4B400] to-[#FFD166] hover:from-[#FFD166] hover:to-[#F4B400] text-white shadow-lg hover:shadow-xl transition-all`}
+                  disabled={loading || success}
+                  className={`w-full py-6 text-lg bg-gradient-to-r from-[#F4B400] to-[#FFD166] hover:from-[#FFD166] hover:to-[#F4B400] text-white shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  <UtensilsCrossed className="w-5 h-5 mr-2" />
-                  Create Food Order
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Creating Order...
+                    </>
+                  ) : success ? (
+                    <>
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Order Created!
+                    </>
+                  ) : (
+                    <>
+                      <UtensilsCrossed className="w-5 h-5 mr-2" />
+                      Create Food Order
+                    </>
+                  )}
                 </Button>
               </form>
             </motion.div>
@@ -619,22 +1005,36 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               className={`rounded-3xl backdrop-blur-xl overflow-hidden ${
-                isDark 
-                  ? 'bg-[#1A1F1A]/60 border-[#3A463A]/50' 
-                  : 'bg-white/30 border-white/60'
+                isDark
+                  ? "bg-[#1A1F1A]/60 border-[#3A463A]/50"
+                  : "bg-white/30 border-white/60"
               } border shadow-2xl h-fit lg:sticky lg:top-32`}
             >
-              <div className={`p-6 border-b ${isDark ? 'border-[#3A463A]' : 'border-white/40'}`}>
+              <div
+                className={`p-6 border-b ${
+                  isDark ? "border-[#3A463A]" : "border-white/40"
+                }`}
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-3 rounded-xl bg-gradient-to-br from-[#FF7F50] to-[#F4B400]">
                     <Package className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className={`text-xl ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                    <h3
+                      className={`text-xl ${
+                        isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                      }`}
+                    >
                       Order Summary
                     </h3>
-                    <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                      {selectedRestaurant ? selectedRestaurant.label : 'Select a restaurant'}
+                    <p
+                      className={`text-sm ${
+                        isDark ? "text-[#758173]" : "text-[#020402]/70"
+                      }`}
+                    >
+                      {selectedRestaurant
+                        ? selectedRestaurant.label
+                        : "Select a restaurant"}
                     </p>
                   </div>
                 </div>
@@ -647,18 +1047,28 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`p-4 rounded-xl ${
-                      isDark 
-                        ? 'bg-[#020402]/40 border-[#3A463A]' 
-                        : 'bg-white/50 border-white/60'
+                      isDark
+                        ? "bg-[#020402]/40 border-[#3A463A]"
+                        : "bg-white/50 border-white/60"
                     } border`}
                   >
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-3xl">{selectedRestaurant.icon}</span>
+                      <span className="text-3xl">
+                        {selectedRestaurant.icon}
+                      </span>
                       <div>
-                        <h4 className={`${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                        <h4
+                          className={`${
+                            isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                          }`}
+                        >
                           {selectedRestaurant.label}
                         </h4>
-                        <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                        <p
+                          className={`text-sm ${
+                            isDark ? "text-[#758173]" : "text-[#020402]/70"
+                          }`}
+                        >
                           {selectedRestaurant.cuisine} Cuisine
                         </p>
                       </div>
@@ -674,12 +1084,24 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                     className="space-y-3"
                   >
                     <div className="flex items-start gap-3">
-                      <MapPin className={`w-5 h-5 mt-0.5 ${isDark ? 'text-[#FF7F50]' : 'text-[#F4B400]'}`} />
+                      <MapPin
+                        className={`w-5 h-5 mt-0.5 ${
+                          isDark ? "text-[#FF7F50]" : "text-[#F4B400]"
+                        }`}
+                      />
                       <div>
-                        <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                        <p
+                          className={`text-sm ${
+                            isDark ? "text-[#758173]" : "text-[#020402]/70"
+                          }`}
+                        >
                           Delivering to
                         </p>
-                        <p className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
+                        <p
+                          className={
+                            isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                          }
+                        >
                           {deliveryLocation}
                         </p>
                       </div>
@@ -687,17 +1109,33 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
 
                     {deliveryDate && deliveryTime && (
                       <div className="flex items-start gap-3">
-                        <Clock className={`w-5 h-5 mt-0.5 ${isDark ? 'text-[#F4B400]' : 'text-[#FF7F50]'}`} />
+                        <Clock
+                          className={`w-5 h-5 mt-0.5 ${
+                            isDark ? "text-[#F4B400]" : "text-[#FF7F50]"
+                          }`}
+                        />
                         <div>
-                          <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                          <p
+                            className={`text-sm ${
+                              isDark ? "text-[#758173]" : "text-[#020402]/70"
+                            }`}
+                          >
                             Delivery time
                           </p>
-                          <p className={isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}>
-                            {new Date(deliveryDate).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric',
-                              year: 'numeric'
-                            })} at {deliveryTime}
+                          <p
+                            className={
+                              isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                            }
+                          >
+                            {new Date(deliveryDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              }
+                            )}{" "}
+                            at {deliveryTime}
                           </p>
                         </div>
                       </div>
@@ -706,43 +1144,65 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                 )}
 
                 {/* Items List */}
-                {items.some(item => item.name) && (
+                {items.some((item) => item.name) && (
                   <div className="space-y-3">
-                    <h4 className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
+                    <h4
+                      className={`text-sm ${
+                        isDark ? "text-[#758173]" : "text-[#020402]/70"
+                      }`}
+                    >
                       Order Items
                     </h4>
                     <div className="space-y-2">
-                      {items.filter(item => item.name).map((item) => (
-                        <motion.div
-                          key={item.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className={`flex items-center justify-between p-3 rounded-lg ${
-                            isDark 
-                              ? 'bg-[#020402]/30' 
-                              : 'bg-white/40'
-                          }`}
-                        >
-                          <div className="flex-1">
-                            <p className={`text-sm ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
-                              {item.name}
-                            </p>
-                            <p className={`text-xs ${isDark ? 'text-[#758173]' : 'text-[#020402]/60'}`}>
-                              Qty: {item.quantity}
-                            </p>
-                          </div>
-                          <span className={`${isDark ? 'text-[#F4B400]' : 'text-[#FF7F50]'}`}>
-                            ${(item.price * item.quantity).toFixed(2)}
-                          </span>
-                        </motion.div>
-                      ))}
+                      {items
+                        .filter((item) => item.name)
+                        .map((item) => (
+                          <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className={`flex items-center justify-between p-3 rounded-lg ${
+                              isDark ? "bg-[#020402]/30" : "bg-white/40"
+                            }`}
+                          >
+                            <div className="flex-1">
+                              <p
+                                className={`text-sm ${
+                                  isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                                }`}
+                              >
+                                {item.name}
+                              </p>
+                              <p
+                                className={`text-xs ${
+                                  isDark
+                                    ? "text-[#758173]"
+                                    : "text-[#020402]/60"
+                                }`}
+                              >
+                                Qty: {item.quantity}
+                              </p>
+                            </div>
+                            <span
+                              className={`${
+                                isDark ? "text-[#F4B400]" : "text-[#FF7F50]"
+                              }`}
+                            >
+                              ${(item.price * item.quantity).toFixed(2)}
+                            </span>
+                          </motion.div>
+                        ))}
                     </div>
                   </div>
                 )}
 
                 {/* Visual Separator */}
-                {items.some(item => item.name) && totalCost > 0 && (
-                  <div className={`border-t ${isDark ? 'border-[#3A463A]' : 'border-white/40'}`} />
+                {items.some((item) => item.name) && totalCost > 0 && (
+                  <div
+                    className={`border-t ${
+                      isDark ? "border-[#3A463A]" : "border-white/40"
+                    }`}
+                  />
                 )}
 
                 {/* Total */}
@@ -752,24 +1212,38 @@ export function CreateFoodOrder({ isDark, toggleTheme, onNavigateBack, onNavigat
                     animate={{ opacity: 1, y: 0 }}
                     className="flex items-center justify-between pt-2"
                   >
-                    <span className={`text-lg ${isDark ? 'text-[#C5EFCB]' : 'text-[#020402]'}`}>
+                    <span
+                      className={`text-lg ${
+                        isDark ? "text-[#C5EFCB]" : "text-[#020402]"
+                      }`}
+                    >
                       Total
                     </span>
-                    <span className={`text-2xl ${isDark ? 'text-[#F4B400]' : 'text-[#FF7F50]'}`}>
+                    <span
+                      className={`text-2xl ${
+                        isDark ? "text-[#F4B400]" : "text-[#FF7F50]"
+                      }`}
+                    >
                       ${totalCost.toFixed(2)}
                     </span>
                   </motion.div>
                 )}
 
                 {/* Empty State */}
-                {!selectedRestaurant && !deliveryLocation && items.every(item => !item.name) && (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🍽️</div>
-                    <p className={`text-sm ${isDark ? 'text-[#758173]' : 'text-[#020402]/70'}`}>
-                      Fill out the form to see your order summary
-                    </p>
-                  </div>
-                )}
+                {!selectedRestaurant &&
+                  !deliveryLocation &&
+                  items.every((item) => !item.name) && (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">🍽️</div>
+                      <p
+                        className={`text-sm ${
+                          isDark ? "text-[#758173]" : "text-[#020402]/70"
+                        }`}
+                      >
+                        Fill out the form to see your order summary
+                      </p>
+                    </div>
+                  )}
               </div>
             </motion.div>
           </div>

@@ -54,15 +54,53 @@ const handleLogin = async (
       }
     );
 
+    console.log("🔐 [Login] Raw response structure:", {
+      hasData: !!response.data,
+      hasDataData: !!response.data?.data,
+      dataKeys: Object.keys(response.data || {}),
+      dataDataKeys: Object.keys(response.data?.data || {}),
+    });
+
     const data = response.data.data;
+
+    console.log("🔐 [Login] Response received:", {
+      hasToken: !!data.token,
+      hasAccessToken: !!data.accessToken,
+      hasRefreshToken: !!data.refreshToken,
+      hasUser: !!data.user,
+      tokenType: typeof data.token,
+      tokenLength: data.token?.length || 0,
+    });
 
     if (data.token) {
       setToken("token", data.token);
+      console.log("✅ [Login] Token stored in localStorage");
       if (data.refreshToken) {
         setToken("refreshToken", data.refreshToken);
+        console.log("✅ [Login] Refresh token stored in localStorage");
       }
+    } else {
+      console.warn("⚠️ [Login] No token in response!");
     }
+
     setToken("userData", JSON.stringify(data.user));
+    console.log("✅ [Login] User data stored in localStorage");
+
+    // Verify storage
+    console.log("🔍 [Login] Verifying localStorage:");
+    console.log(
+      "- token:",
+      localStorage.getItem("token") ? "EXISTS" : "MISSING"
+    );
+    console.log(
+      "- refreshToken:",
+      localStorage.getItem("refreshToken") ? "EXISTS" : "MISSING"
+    );
+    console.log(
+      "- userData:",
+      localStorage.getItem("userData") ? "EXISTS" : "MISSING"
+    );
+
     return data;
   } catch (error: any) {
     const errorMessage = error.response?.data?.message || "Login failed";
