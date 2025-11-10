@@ -13,8 +13,8 @@ import {
   User,
   Phone,
 } from "lucide-react";
-import { Header } from "./Header";
-import { Footer } from "./Footer";
+import { Header } from "./header";
+import { Footer } from "./footer";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";

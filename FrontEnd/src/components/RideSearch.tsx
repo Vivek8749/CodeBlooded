@@ -11,8 +11,8 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { Header } from "./Header";
-import { Footer } from "./Footer";
+import { Header } from "./header";
+import { Footer } from "./footer";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { searchRides } from "../api/ridesApi";
@@ -367,8 +367,8 @@ export function RideSearch({
           <div
             className={`absolute inset-0 ${
               isDark
-          ? "bg-[#020402] opacity-[.97]"
-          : "bg-gradient-to-br from-[#A9C5A0] via-[#C5EFCB] to-[#FFD166] opacity-[.97]"
+                ? "bg-[#020402] opacity-[.97]"
+                : "bg-gradient-to-br from-[#A9C5A0] via-[#C5EFCB] to-[#FFD166] opacity-[.97]"
             }`}
           />
 

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Header } from "./Header";
+import { Header } from "./header";
 import { useAppNavigation } from "../utils/navigation";
 import { ROUTES } from "../routes";
 
