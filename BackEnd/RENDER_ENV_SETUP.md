@@ -5,10 +5,12 @@
 Set these environment variables in your Render.com dashboard:
 
 ### 1. Go to Render Dashboard
+
 - Navigate to: https://dashboard.render.com/
 - Select your backend service: `codeblooded-9jnh`
 
 ### 2. Go to Environment Variables
+
 - Click on "Environment" in the left sidebar
 - Click "Add Environment Variable"
 
@@ -36,6 +38,7 @@ CORS_ORIGIN=https://code-blooded-vexd.vercel.app
 ### 4. Generate Strong Secrets
 
 Run this command to generate random secrets:
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
@@ -45,6 +48,7 @@ Run it twice to get two different secrets for ACCESS_TOKEN_SECRET and REFRESH_TO
 ### 5. MongoDB Atlas Setup
 
 Make sure your MongoDB Atlas:
+
 1. **IP Whitelist**: Add `0.0.0.0/0` to allow Render to connect
 2. **Database User**: Has read/write permissions
 3. **Connection String**: Use the correct format:
@@ -55,6 +59,7 @@ Make sure your MongoDB Atlas:
 ### 6. Save and Redeploy
 
 After adding/updating environment variables:
+
 1. Click "Save Changes"
 2. Render will automatically redeploy your service
 3. Wait for the deployment to complete (2-3 minutes)
@@ -62,6 +67,7 @@ After adding/updating environment variables:
 ### 7. Test the Connection
 
 After deployment:
+
 1. Visit: https://codeblooded-9jnh.onrender.com/api/v1/health
 2. You should see: `{"status":"ok","message":"Riden'Byte API is healthy",...}`
 
@@ -75,15 +81,18 @@ Try to login - CORS errors should now be resolved.
 ### If CORS errors persist:
 
 1. **Check Render Logs**:
+
    - Go to Render Dashboard → Logs
    - Look for CORS-related errors
 
 2. **Verify Environment Variables**:
+
    - Ensure `CORS_ORIGIN=https://code-blooded-vexd.vercel.app`
    - No trailing slashes
    - Exact match with your Vercel URL
 
 3. **Check MongoDB Connection**:
+
    - Look for "MongoDB connected" in logs
    - Verify IP whitelist includes Render's IPs
 
@@ -94,6 +103,7 @@ Try to login - CORS errors should now be resolved.
 ## Current Backend Configuration
 
 The backend now supports these origins:
+
 - `http://localhost:5173` (local dev)
 - `http://localhost:5174` (local dev alternate)
 - `https://code-blooded-vexd.vercel.app` (production frontend)
@@ -102,6 +112,7 @@ The backend now supports these origins:
 ## Need Help?
 
 If issues persist, check:
+
 1. Render deployment logs
 2. Browser console for detailed error messages
 3. Network tab in DevTools to see the exact request/response

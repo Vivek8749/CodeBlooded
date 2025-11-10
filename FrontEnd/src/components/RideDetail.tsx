@@ -29,22 +29,53 @@ interface RideDetailProps {
   onNavigateToFoodSearch?: () => void;
 }
 
-export function RideDetail({ isDark, toggleTheme, onNavigateBack, onNavigateToDashboard, onNavigateToRideSearch, onNavigateToFoodSearch }: RideDetailProps) {
+export function RideDetail({
+  isDark,
+  toggleTheme,
+  onNavigateBack,
+  onNavigateToDashboard,
+  onNavigateToRideSearch,
+  onNavigateToFoodSearch,
+}: RideDetailProps) {
   const handleNavigate = (page: string) => {
-    if (page === 'dashboard') {
+    if (page === "dashboard") {
       onNavigateToDashboard?.();
-    } else if (page === 'rides') {
+    } else if (page === "rides") {
       onNavigateToRideSearch?.();
-    } else if (page === 'food') {
+    } else if (page === "food") {
       onNavigateToFoodSearch?.();
     }
   };
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
-    { id: 1, sender: "Jessica", text: "Hey everyone! I'm the driver for today's ride.", time: "10:30 AM", isOwn: false },
-    { id: 2, sender: "You", text: "Great! What time are we leaving?", time: "10:32 AM", isOwn: true },
-    { id: 3, sender: "Jessica", text: "We'll leave at 4:30 PM sharp from the Campus Main Gate.", time: "10:33 AM", isOwn: false },
-    { id: 4, sender: "Mike", text: "Perfect! I'll be there on time.", time: "10:35 AM", isOwn: false },
+    {
+      id: 1,
+      sender: "Jessica",
+      text: "Hey everyone! I'm the driver for today's ride.",
+      time: "10:30 AM",
+      isOwn: false,
+    },
+    {
+      id: 2,
+      sender: "You",
+      text: "Great! What time are we leaving?",
+      time: "10:32 AM",
+      isOwn: true,
+    },
+    {
+      id: 3,
+      sender: "Jessica",
+      text: "We'll leave at 4:30 PM sharp from the Campus Main Gate.",
+      time: "10:33 AM",
+      isOwn: false,
+    },
+    {
+      id: 4,
+      sender: "Mike",
+      text: "Perfect! I'll be there on time.",
+      time: "10:35 AM",
+      isOwn: false,
+    },
   ]);
   const [progress, setProgress] = useState(0);
 
@@ -70,7 +101,7 @@ export function RideDetail({ isDark, toggleTheme, onNavigateBack, onNavigateToDa
     carPlate: "ABC-1234",
     organizer: "Jessica P.",
     organizerRating: 4.7,
-    organizerPhone: "+91 98765 43210"
+    organizerPhone: "+91 98765 43210",
   };
 
   const handleSendMessage = () => {
