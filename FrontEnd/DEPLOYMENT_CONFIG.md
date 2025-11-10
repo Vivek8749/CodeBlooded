@@ -32,11 +32,13 @@ Your frontend is now configured to connect to your Render backend.
 After adding the environment variable, you need to redeploy:
 
 **Option A: From Vercel Dashboard**
+
 1. Go to **Deployments** tab
 2. Click on the latest deployment
 3. Click **Redeploy** button
 
 **Option B: Push to GitHub**
+
 ```bash
 git add .
 git commit -m "Update backend URL to Render"
@@ -56,11 +58,13 @@ Vercel will automatically deploy.
 ## 🧪 Quick Test
 
 ### Test Backend Health:
+
 ```bash
 curl https://codeblooded-9jnh.onrender.com/api/v1/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "ok",
@@ -71,9 +75,11 @@ Expected response:
 ```
 
 ### Test Frontend API Config:
+
 Open browser console on your site and run:
+
 ```javascript
-console.log(import.meta.env.VITE_API_BASE_URL)
+console.log(import.meta.env.VITE_API_BASE_URL);
 ```
 
 Should show: `https://codeblooded-9jnh.onrender.com`
@@ -81,16 +87,19 @@ Should show: `https://codeblooded-9jnh.onrender.com`
 ## 🔧 Environment Variables Summary
 
 ### Local Development (.env)
+
 ```env
 VITE_API_BASE_URL=https://codeblooded-9jnh.onrender.com
 ```
 
 ### Vercel Production
+
 ```env
 VITE_API_BASE_URL=https://codeblooded-9jnh.onrender.com
 ```
 
 ### Backend Render
+
 ```env
 CORS_ORIGIN=https://code-blooded-vexd.vercel.app
 NODE_ENV=production
@@ -101,11 +110,14 @@ NODE_ENV=production
 ### Issue: "Network Error" or "Failed to fetch"
 
 **Possible causes:**
+
 1. Backend is sleeping (Render free tier)
+
    - **Solution:** Visit the health endpoint to wake it up
    - Wait 30-60 seconds for cold start
 
 2. CORS error
+
    - **Solution:** Check backend CORS_ORIGIN is set to `https://code-blooded-vexd.vercel.app`
    - No trailing slash!
 
@@ -118,6 +130,7 @@ NODE_ENV=production
 **Cause:** Vercel hasn't picked up new environment variable
 
 **Solution:**
+
 1. Clear browser cache
 2. Redeploy from Vercel dashboard
 3. Check environment variables are saved
@@ -127,6 +140,7 @@ NODE_ENV=production
 **Error:** `Access-Control-Allow-Origin`
 
 **Solution:**
+
 1. Go to Render backend dashboard
 2. Check environment variable: `CORS_ORIGIN=https://code-blooded-vexd.vercel.app`
 3. Make sure there's no trailing `/` and it's `https://` not `http://`
