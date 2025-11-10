@@ -180,7 +180,7 @@ export function Footer({ isDark, onNavigate }: FooterProps) {
 														: "text-[#020402]/70"
 												}`}
 											>
-												+91 0085163538
+												+91 8516353800
 											</span>
 										</div>
 										<div className="flex items-center gap-3">
@@ -323,7 +323,7 @@ export function Footer({ isDark, onNavigate }: FooterProps) {
 										aria-label={social.label}
 									>
 										<social.icon
-											className={`w-4 h-4 ${
+											className={`w-6 h-6 ${
 												isDark
 													? "text-[#C5EFCB]"
 													: "text-[#758173]"
