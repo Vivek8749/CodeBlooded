@@ -1,6 +1,5 @@
 import { motion } from "motion/react";
-import { useState, useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Send,
@@ -13,8 +12,6 @@ import {
   User,
   Phone,
   Star,
-  Gauge,
-  TrendingUp,
 } from "lucide-react";
 import { Header } from "./header";
 import { Footer } from "./footer";
@@ -22,7 +19,6 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
-import { Avatar, AvatarFallback } from "./ui/avatar";
 
 interface RideDetailProps {
   isDark: boolean;
@@ -41,8 +37,6 @@ export function RideDetail({
   onNavigateToRideSearch,
   onNavigateToFoodSearch,
 }: RideDetailProps) {
-  const { rideId } = useParams<{ rideId: string }>();
-
   const handleNavigate = (page: string) => {
     if (page === "dashboard") {
       onNavigateToDashboard?.();
@@ -52,7 +46,6 @@ export function RideDetail({
       onNavigateToFoodSearch?.();
     }
   };
-
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
     {
@@ -84,20 +77,12 @@ export function RideDetail({
       isOwn: false,
     },
   ]);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
-  const [currentSpeed, setCurrentSpeed] = useState(45);
-
-  // Log the rideId for debugging
-  useEffect(() => {
-    console.log("RideDetail - Current rideId:", rideId);
-  }, [rideId]);
 
   // Simulate live tracking progress
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => (prev >= 100 ? 0 : prev + 0.5));
-      setCurrentSpeed(40 + Math.random() * 20);
     }, 100);
     return () => clearInterval(interval);
   }, []);
@@ -114,9 +99,9 @@ export function RideDetail({
     costPerPerson: "$5",
     carModel: "Honda Civic",
     carPlate: "ABC-1234",
-    driver: "Jessica P.",
-    driverRating: 4.7,
-    driverPhone: "+1 (555) 123-4567",
+    organizer: "Jessica P.",
+    organizerRating: 4.7,
+    organizerPhone: "+91 98765 43210",
   };
 
   const handleSendMessage = () => {
@@ -148,7 +133,7 @@ export function RideDetail({
         onNavigate={handleNavigate}
       />
 
-      <div className="flex-1 relative pb-20">
+      <div className="flex-1 relative">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">
           <div
@@ -161,7 +146,7 @@ export function RideDetail({
         </div>
 
         {/* Main Content */}
-        <div className="relative z-10 px-6 pt-32 pb-12 max-w-[1800px] mx-auto h-[calc(100vh-80px)]">
+        <div className="relative z-10 px-6 pt-32 pb-20 max-w-[1800px] mx-auto">
           {/* Back Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -894,7 +879,7 @@ export function RideDetail({
                         <circle r="9" fill="white" opacity="0.95" />
                         <Car
                           className="w-5 h-5"
-                          style={{ x: -10, y: -10 }}
+                          style={{ transform: "translate(-10px, -10px)" }}
                           fill={isDark ? "#020402" : "#FFD166"}
                           stroke="white"
                           strokeWidth={1}
