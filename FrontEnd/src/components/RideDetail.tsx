@@ -148,7 +148,7 @@ export function RideDetail({
         onNavigate={handleNavigate}
       />
 
-      <div className="flex-1 relative">
+      <div className="flex-1 relative pb-20">
         {/* Animated Background */}
         <div className="absolute inset-0 z-0">
           <div
