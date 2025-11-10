@@ -29,7 +29,7 @@ export function cspPlugin(): Plugin {
         "style-src 'self' 'unsafe-inline'", // Keep unsafe-inline for CSS-in-JS if needed
         "img-src 'self' data: https: blob:",
         "font-src 'self' data:",
-        "connect-src 'self' https://api.ridenbyte.com", // Replace with your production API domain
+        "connect-src 'self' https://codeblooded-9jnh.onrender.com", // Backend API domain
         "media-src 'self'",
         "object-src 'none'",
         "base-uri 'self'",
