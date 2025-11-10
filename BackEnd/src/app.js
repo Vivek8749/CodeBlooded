@@ -18,9 +18,18 @@ app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 
-// Health check
+// Health check endpoints
 app.get("/", (req, res) => {
   res.json({ status: "ok", message: "Riden'Byte API is running" });
+});
+
+app.get("/api/v1/health", (req, res) => {
+  res.json({
+    status: "ok",
+    message: "Riden'Byte API is healthy",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+  });
 });
 
 // Routes

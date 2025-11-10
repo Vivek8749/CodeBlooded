@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: ridenbyte-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8000
+      - key: CORS_ORIGIN
+        value: https://code-blooded-vexd.vercel.app
+      - key: ACCESS_TOKEN_EXPIRY
+        value: 15m
+      - key: REFRESH_TOKEN_EXPIRY
+        value: 7d
+      - key: DB_NAME
+        value: ridenbyte
+      # Add these secrets in Render Dashboard:
+      # - MONGO_URI
+      # - ACCESS_TOKEN_SECRET
+      # - REFRESH_TOKEN_SECRET

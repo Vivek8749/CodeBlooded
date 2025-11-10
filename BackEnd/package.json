@@ -1,14 +1,18 @@
 {
   "name": "ridendrive-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend API for RideN'Byte - Student ride sharing and food ordering platform",
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "index.js",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "build": "echo 'No build step required for Node.js'"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
