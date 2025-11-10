@@ -5,10 +5,19 @@ import { ApiResponse } from "../utils/apiResponse.js";
 
 // Create a new ride
 const createRide = asyncHandler(async (req, res) => {
+  console.log("🚗 [Create Ride Controller] Request received");
+  console.log(
+    "🚗 [Create Ride Controller] User from req.user:",
+    req.user ? req.user.email : "MISSING"
+  );
+  console.log("🚗 [Create Ride Controller] User ID:", req.user?._id);
+  console.log("🚗 [Create Ride Controller] Request body:", req.body);
+
   const { from, to, expiryTime, maxSeats, totalPrice, vehicleDetails, notes } =
     req.body;
 
   if (!from || !to || !expiryTime || !maxSeats || !totalPrice) {
+    console.error("❌ [Create Ride] Missing required fields");
     throw new ApiError(
       400,
       "From, to, expiry time, seats, and total price are required"
@@ -19,8 +28,11 @@ const createRide = asyncHandler(async (req, res) => {
   const expiry = new Date(expiryTime);
 
   if (expiry <= new Date()) {
+    console.error("❌ [Create Ride] Expiry time is in the past");
     throw new ApiError(400, "Expiry time must be in the future");
   }
+
+  console.log("✅ [Create Ride] Creating ride for user:", req.user._id);
 
   const ride = await Ride.create({
     createdBy: req.user._id,
@@ -34,10 +46,14 @@ const createRide = asyncHandler(async (req, res) => {
     notes,
   });
 
+  console.log("✅ [Create Ride] Ride created with ID:", ride._id);
+
   const populatedRide = await Ride.findById(ride._id).populate(
     "createdBy",
     "name email phone"
   );
+
+  console.log("✅ [Create Ride] Ride populated and returning response");
 
   return res
     .status(201)

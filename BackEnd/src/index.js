@@ -4,7 +4,28 @@ import { connectDB, disconnectDB } from "./db/index.js";
 import { PORT } from "./constants.js";
 import { startExpiryChecker } from "./utils/rideExpiryChecker.js";
 
-dotenv.config({ path: "./.env" });
+// Load environment variables
+const envResult = dotenv.config({ path: "./.env" });
+
+if (envResult.error) {
+  console.error("❌ Error loading .env file:", envResult.error);
+  console.log("⚠️ Trying alternative path...");
+  dotenv.config(); // Try default path
+}
+
+console.log("🔧 Environment variables loaded:");
+console.log("- NODE_ENV:", process.env.NODE_ENV);
+console.log("- PORT:", process.env.PORT);
+console.log("- MONGO_URI exists:", !!process.env.MONGO_URI);
+console.log("- ACCESS_TOKEN_SECRET exists:", !!process.env.ACCESS_TOKEN_SECRET);
+console.log(
+  "- ACCESS_TOKEN_SECRET length:",
+  process.env.ACCESS_TOKEN_SECRET?.length || 0
+);
+console.log(
+  "- REFRESH_TOKEN_SECRET exists:",
+  !!process.env.REFRESH_TOKEN_SECRET
+);
 
 const port = Number(PORT) || 8000;
 

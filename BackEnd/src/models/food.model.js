@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const rideSchema = new mongoose.Schema(
+const foodSchema = new mongoose.Schema(
   {
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -19,14 +19,19 @@ const rideSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-    Offer: [{
-        ispercentage: Boolean,
-        amount: Number
-    }],
+    Offer: [
+      {
+        isPercentage: Boolean,
+        amount: Number,
+      },
+    ],
     currentParticipants: {
       type: Number,
       required: true,
       default: 1,
+    },
+    maxParticipants: {
+      type: Number,
     },
     participants: [
       {
@@ -45,6 +50,21 @@ const rideSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    deliveryLocation: {
+      type: String,
+      trim: true,
+    },
+    cuisine: {
+      type: String,
+      trim: true,
+    },
+    items: [
+      {
+        name: String,
+        quantity: Number,
+        price: Number,
+      },
+    ],
     expiryTime: {
       type: Date,
       required: true,
@@ -66,28 +86,35 @@ const rideSchema = new mongoose.Schema(
   }
 );
 
-// Index for searching rides
-rideSchema.index({ to: 1, expiryTime: 1 });
+// Index for searching food orders
+foodSchema.index({ restaurant: 1, expiryTime: 1 });
+foodSchema.index({ cuisine: 1 });
+foodSchema.index({ deliveryLocation: 1 });
 
-// Virtual for checking if ride is full
-rideSchema.virtual("isFull").get(function () {
-  return this.currentSeats >= this.maxSeats;
+// Index for searching food orders
+foodSchema.index({ restaurant: 1, expiryTime: 1 });
+foodSchema.index({ cuisine: 1 });
+foodSchema.index({ deliveryLocation: 1 });
+
+// Virtual for checking if order is full
+foodSchema.virtual("isFull").get(function () {
+  if (!this.maxParticipants) return false;
+  return this.currentParticipants >= this.maxParticipants;
 });
 
-// Virtual for checking if ride is expired
-rideSchema.virtual("isExpired").get(function () {
+// Virtual for checking if order is expired
+foodSchema.virtual("isExpired").get(function () {
   return new Date() > this.expiryTime;
 });
 
 // Method to calculate split amount (for frontend display)
-rideSchema.methods.calculateSplit = function () {
-  const totalParticipants = this.participants.length + 1; // +1 for creator
-  return this.totalPrice / totalParticipants;
+foodSchema.methods.calculateSplit = function () {
+  return this.totalPrice / this.currentParticipants;
 };
 
-// Pre-find middleware to mark expired rides
-rideSchema.pre(/^find/, async function (next) {
-  // Update all rides that have passed expiryTime but are not marked as expired
+// Pre-find middleware to mark expired food orders
+foodSchema.pre(/^find/, async function (next) {
+  // Update all food orders that have passed expiryTime but are not marked as expired
   await this.model.updateMany(
     {
       expiryTime: { $lte: new Date() },
@@ -100,8 +127,8 @@ rideSchema.pre(/^find/, async function (next) {
   next();
 });
 
-// Method to check and mark ride as expired
-rideSchema.methods.checkAndUpdateExpiry = async function () {
+// Method to check and mark food order as expired
+foodSchema.methods.checkAndUpdateExpiry = async function () {
   if (!this.expired && new Date() > this.expiryTime) {
     this.expired = true;
     await this.save();
@@ -109,5 +136,5 @@ rideSchema.methods.checkAndUpdateExpiry = async function () {
   return this.expired;
 };
 
-const Ride = mongoose.model("Ride", rideSchema);
-export default Ride;
+const Food = mongoose.model("Food", foodSchema);
+export default Food;

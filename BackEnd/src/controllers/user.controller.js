@@ -77,21 +77,28 @@ const CreateNewUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
+  console.log("🔐 [Login Controller] Login attempt");
   const { email, password } = req.body || {};
 
   // Validate input
   if (email === undefined || password === undefined) {
+    console.error("❌ [Login] Missing email or password");
     throw new ApiError(400, "Invalid login details");
   }
 
+  console.log("🔐 [Login] Looking up user:", email);
   const user = await User.findOne({ email });
 
   if (!user || !(await user.comparePassword(password))) {
+    console.error("❌ [Login] Invalid credentials for:", email);
     throw new ApiError(401, "Invalid email or password");
   }
 
+  console.log("✅ [Login] User authenticated:", user.email);
+
   // Generate JWT tokens
   const { refreshToken, accessToken } = await generateAuthTokens(user._id);
+  console.log("✅ [Login] Tokens generated");
 
   const userData = await User.findById(user._id).select(
     "-password -refreshToken -refreshTokens"
@@ -105,21 +112,33 @@ const loginUser = asyncHandler(async (req, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
 
+  console.log("🍪 [Login] Setting cookies with options:", {
+    httpOnly: cookieOptions.httpOnly,
+    secure: cookieOptions.secure,
+    sameSite: cookieOptions.sameSite,
+  });
+
+  const responseData = {
+    user: userData,
+    token: accessToken, // For localStorage
+    refreshToken: refreshToken, // For localStorage
+  };
+
+  console.log("✅ [Login] Sending response with structure:", {
+    statusCode: 200,
+    data: {
+      hasUser: !!responseData.user,
+      hasToken: !!responseData.token,
+      hasRefreshToken: !!responseData.refreshToken,
+      tokenLength: responseData.token?.length,
+    },
+  });
+
   return res
     .status(200)
     .cookie("refreshToken", refreshToken, cookieOptions)
     .cookie("accessToken", accessToken, cookieOptions)
-    .json(
-      new ApiResponse(
-        200,
-        {
-          user: userData,
-          token: accessToken, // For localStorage
-          refreshToken: refreshToken, // For localStorage
-        },
-        "Login successful"
-      )
-    );
+    .json(new ApiResponse(200, responseData, "Login successful"));
 });
 
 const logoutUser = asyncHandler(async (req, res) => {

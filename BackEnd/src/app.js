@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/user.route.js";
 import rideRoutes from "./routes/ride.route.js";
+import foodRoutes from "./routes/food.route.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/rides", rideRoutes);
+app.use("/api/v1/food", foodRoutes);
 
 // 404 handler
 app.use((req, res) => {
